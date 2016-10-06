@@ -17,7 +17,7 @@ test_tendrl_node_agent
 ----------------------------------
 
 Tests for `tendrl_node_agent` module.
-"""
+
 
 from tendrl_node_agent.tests import base
 
@@ -26,3 +26,4 @@ class TestTendrl_node_agent(base.TestCase):
 
     def test_something(self):
         pass
+"""
