@@ -60,7 +60,7 @@ enviroment which we have created during installation of *bridge common*.
 4. Create log dir::
 
      $ mkdir /var/log/tendrl/common
-     $ mkdir /var/log/tendrl/common/node_agent
+     $ mkdir /var/log/tendrl/node_agent
      
 5. Run::
      
