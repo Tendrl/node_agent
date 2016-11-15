@@ -27,5 +27,5 @@ class ImportCluster(Flow):
         gluster = "git+https://github.com/Tendrl/gluster_integration"
         self.parameters['Package.name'] = gluster
         self.parameters['Node.cmd_str'] = "tendrl-gluster-integration " \
-                                          "--cluster-id %s" % cluster_id
+                                          "--cluster-id %s &" % cluster_id
         return super(ImportCluster, self).run()

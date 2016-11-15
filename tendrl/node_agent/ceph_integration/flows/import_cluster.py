@@ -29,5 +29,5 @@ class ImportCluster(Flow):
         ceph = "git+https://github.com/Tendrl/ceph_integration"
         self.parameters['Package.name'] = ceph
         self.parameters['Node.cmd_str'] = "tendrl-ceph-integration " \
-                                          "--cluster-id %s" % cluster_id
+                                          "--cluster-id %s &" % cluster_id
         return super(ImportCluster, self).run()
