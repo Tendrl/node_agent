@@ -1,3 +1,4 @@
+import netifaces
 import platform
 import socket
 import sys
@@ -5,11 +6,13 @@ import sys
 from mock import MagicMock
 sys.modules['tendrl.node_agent.ansible_runner.ansible_module_runner'] = \
     MagicMock()
+sys.modules['netaddr'] = MagicMock()
 
 from tendrl.node_agent.manager.command import Command
 import tendrl.node_agent.manager.pull_hardware_inventory as hi
 from tendrl.node_agent.manager import utils as mgr_utils
 del sys.modules['tendrl.node_agent.ansible_runner.ansible_module_runner']
+del sys.modules['netaddr']
 
 
 class Test_pull_hardware_inventory(object):
@@ -323,6 +326,17 @@ class Test_pull_hardware_inventory(object):
             }
         monkeypatch.setattr(hi, 'get_node_disks',
                             mock_get_node_disks)
+
+        def mock_get_node_network():
+            return {
+                "ipv4": ["10.70.1.1"],
+                "ipv6": ["fe80::3602:86ff:feb5:a67b"],
+                "netmask": "255.255.0.1",
+                "subnet": "10.70.1.0",
+                "status": "up"
+            }
+        monkeypatch.setattr(hi, 'get_node_network',
+                            mock_get_node_network)
         node_inventory = hi.get_node_inventory()
         node_inventory_expected = {
             "machine_id": "5bb3458a09004b2d9bdadf0705889958",
@@ -361,6 +375,13 @@ class Test_pull_hardware_inventory(object):
                 "type": "disk",
                 "device_name": "/dev/vdc",
                 "size": 536870912000
+            },
+            "network": {
+                "ipv4": ["10.70.1.1"],
+                "ipv6": ["fe80::3602:86ff:feb5:a67b"],
+                "netmask": "255.255.0.1",
+                "subnet": "10.70.1.0",
+                "status": "up"
             }
         }
         assert node_inventory == node_inventory_expected
@@ -575,3 +596,109 @@ class Test_pull_hardware_inventory(object):
         assert result == {"free_disks_id": [],
                           "used_disks_id": [],
                           "disks": []}
+
+    def test_get_node_network(self, monkeypatch):
+        def mock_interfaces():
+            return ['enp0s25', 'lo', 'wlp3s0']
+        monkeypatch.setattr(netifaces, 'interfaces', mock_interfaces)
+
+        out1 = {
+            u'stdout': u'up', u'stderr': ''
+        }, ""
+        out2 = {
+            u'stdout': u'[Created at net.125]\n'
+            'Unique ID: 4Iz5.ndpeucax6V1\n'
+            'Parent ID: ID95.+7zlcpgmWWF\n'
+            'SysFS ID: /class/net/enp0s25\n'
+            'SysFS Device Link: /devices/pci0000:00/0000:00:19.0\n'
+            'Hardware Class: network interface\n'
+            'Model: "Ethernet network interface"\n'
+            'Driver: "e1000e"\n'
+            'Driver Modules: "e1000e"\n'
+            'Device File: enp0s25\n'
+            'HW Address: 68:f7:28:a0:49:1a\n'
+            'Link detected: no', u'stderr': ''
+        }, ""
+        self.count = 0
+
+        def mock_command(param):
+            if self.count <= 1:
+                self.count = self.count + 1
+                return out1
+            else:
+                return out2
+        monkeypatch.setattr(Command, 'start', mock_command)
+        obj = MagicMock()
+        obj.network = "10.10.10.0"
+        hi.netaddr.IPNetwork = MagicMock(return_value=obj)
+
+        def mock_ifaddresses(param):
+            if param == 'enp0s25':
+                return(
+                    {
+                        17: [
+                            {
+                                'broadcast': 'ff:ff:ff:ff:ff:ff',
+                                'addr': '00:02:55:7b:b2:f6'
+                            }
+                        ],
+                        2: [
+                            {
+                                'broadcast': '172.16.161.7',
+                                'netmask': '255.255.255.248',
+                                'addr': '172.16.161.6'
+                            }
+                        ],
+                        10: [
+                            {
+                                'netmask': 'ffff:ffff:ffff:ffff::',
+                                'addr': 'fe80::202:55ff:fe7b:b2f6%eth0'
+                            }
+                        ]
+                    })
+            else:
+                return(
+                    {
+                        17: [
+                            {
+                                'broadcast': 'ff:ff:ff:ff:ff:ff',
+                                'addr': '00:02:44:9b:b1:f4'
+                            }
+                        ],
+                        2: [
+                            {
+                                'broadcast': '172.16.1.12',
+                                'netmask': '255.255.255.248',
+                                'addr': '172.16.150.0'
+                            }
+                        ],
+                        10: [
+                            {
+                                'netmask': 'ffff:ffff:ffff:ffff::',
+                                'addr': 'fe91::444:33ff:fe8b:b1f4%eth0'
+                            }
+                        ]
+                    })
+        monkeypatch.setattr(netifaces, 'ifaddresses', mock_ifaddresses)
+
+        result = hi.get_node_network()
+        assert result == (
+            {
+                u'enp0s25': {'driver': u'e1000e',
+                             'interface_type': u'network interface',
+                             'status': u'up',
+                             'device_link': u'/devices/pci0000',
+                             'ipv4': ['172.16.161.6'],
+                             'model': u'Ethernet network interface',
+                             'ipv6': ['fe80::202:55ff:fe7b:b2f6%eth0'],
+                             'drive': '',
+                             'interface_name': u'enp0s25',
+                             'hw_address': u'68',
+                             'link_detected': u'no',
+                             'driver_modules': u'e1000e',
+                             'subnet': "10.10.10.0/%s" % obj,
+                             'netmask': ['255.255.255.248'],
+                             'interface_id': u'4Iz5.ndpeucax6V1',
+                             'sysfs_id': u'/class/net/enp0s25'
+                             }
+            })
