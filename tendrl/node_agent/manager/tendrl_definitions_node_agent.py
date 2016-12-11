@@ -318,6 +318,16 @@ namespace.tendrl.node_agent:
           run: tendrl.node_agent.atoms.service.configure.Configure
           type: Update
           uuid: b90a0d97-8c9f-4ab1-8f64-dbb5638159a3
+        check_service_status:
+          enabled: true
+          inputs:
+            mandatory:
+              - Node.fqdn
+              - Service.name
+          name: "check whether the service is running"
+          run: tendrl.node_agent.objects.service.atoms.check_service_status.CheckServiceStatus
+          type: Create
+          uuid: eda0b13a-7362-48d5-b5ca-4b6d6533a5ab
       attrs:
         config_data:
           help: "Configuration data for the service"
