@@ -22,6 +22,7 @@ from tendrl.node_agent.persistence.cpu import Cpu
 from tendrl.node_agent.persistence.memory import Memory
 from tendrl.node_agent.persistence.node import Node
 from tendrl.node_agent.persistence.node_context import NodeContext
+from tendrl.node_agent.persistence.service import Service
 from tendrl.node_agent.persistence.os import Os
 from tendrl.node_agent.persistence.persister import Persister
 from tendrl.node_agent.persistence.tendrl_context import TendrlContext
@@ -225,6 +226,23 @@ class Manager(object):
                     cpu_family=cpu["CPUFamily"],
                     cpu_count=cpu["CPUs"],
                     node_id=raw_data["node_id"],
+                )
+            )
+        if "service" in raw_data:
+            LOG.info("on_pull, Updating service")
+            cpu = raw_data['cpu']
+            self.persister.update_service(
+                Service(
+                    updated=str(time.time()),
+                    name=service["name"],
+                    command=service["command"],
+                    exe_path=service["exe_path"],
+                    status=service["status"],
+                    cpu_usage_per=service["cpu_usage_per"],
+                    mem_usage_per=service["mem_usage_per"],
+                    fds_count=service["fds_count"],
+                    threads_count=service["threads_count"],
+                    open_files_cnt=service["open_files_cnt"],
                 )
             )
 
