@@ -73,6 +73,30 @@ namespace.tendrl.node_agent:
           type: String
       enabled: true
       value: nodes/$Node_context.node_id/Os
+    Service:
+      attrs:
+        name:
+          type: String
+        command:
+          type: String
+        exe_path:
+          type: String
+        status:
+          type: String
+        cpu_usage_per:
+          type: String
+        mem_msage_per:
+          type: String
+        fds_count:
+          type: String
+        process_count:
+          type: String
+        threads_count:
+          type: String
+        open_files_cnt:
+          type: String
+      enabled: true
+      value: nodes/$Node_context.node_id/Service/name
     Package:
       atoms:
         install:

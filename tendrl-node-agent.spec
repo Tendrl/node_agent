@@ -22,6 +22,7 @@ Requires: python-gevent
 Requires: python-greenlet
 Requires: collectd
 Requires: python-jinja2
+Requires: python-psutil
 Requires: tendrl-common
 
 %description

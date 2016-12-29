@@ -1,6 +1,7 @@
 from command import Command
 import platform
 import socket
+from service_deduction import Service
 
 from tendrl.node_agent.manager import utils as mgr_utils
 
@@ -136,6 +137,7 @@ def get_node_inventory():
     node_inventory["os"] = getNodeOs()
     node_inventory["cpu"] = getNodeCpu()
     node_inventory["memory"] = getNodeMemory()
+    node_inventory["service"] = Service.get_details()
     node_inventory["tendrl_context"] = getTendrlContext()
 
     return node_inventory
