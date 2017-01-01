@@ -197,7 +197,7 @@ namespace.tendrl.node_agent.gluster_integration:
           - Tendrl_context.sds_version
           - Tendrl_context.cluster_id
       post_run:
-        - tendrl.node_agent.gluster_integration.objects.Tendrl_context.atoms.check_cluster_id_exists
+        - tendrl.node_agent.objects.Tendrl_context.atoms.check_cluster_id_exists
       pre_run:
         - tendrl.node_agent.objects.Node.atoms.check_node_up
         - tendrl.node_agent.objects.Tendrl_context.atoms.compare
@@ -253,7 +253,7 @@ namespace.tendrl.node_agent.ceph_integration:
           - Tendrl_context.sds_version
           - Tendrl_context.cluster_id
       post_run:
-        - tendrl.node_agent.ceph_integration.objects.Tendrl_context.atoms.check_cluster_id_exists
+        - tendrl.node_agent.objects.Tendrl_context.atoms.check_cluster_id_exists
       pre_run:
         - tendrl.node_agent.objects.Node.atoms.check_node_up
         - tendrl.node_agent.objects.Tendrl_context.atoms.compare

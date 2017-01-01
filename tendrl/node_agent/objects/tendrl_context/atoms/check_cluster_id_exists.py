@@ -4,21 +4,18 @@ from tendrl.node_agent.config import TendrlConfig
 config = TendrlConfig()
 
 
-class Compare(object):
+class CheckClusterIdExists(object):
     def run(self, parameters):
+        cluster_id = parameters.get('Tendrl_context.cluster_id')
         sds_name = parameters.get("Tendrl_context.sds_name")
         sds_version = parameters.get("Tendrl_context.sds_version")
+
         etcd_kwargs = {'port': int(config.get("common", "etcd_port")),
                        'host': config.get("common", "etcd_connection")}
 
         client = etcd.Client(**etcd_kwargs)
-        # get the node_agent_key some how
-        # for now reading it from the json file
 
-        with open("/etc/tendrl/node_agent/node_context") as f:
-            node_id = f.read()
-
-        path = "/nodes/%s/Tendrl_context" % node_id
+        path = "/clusters/%s/Tendrl_context" % cluster_id
         try:
             tendrl_context = client.read(path)
         except etcd.EtcdKeyNotFound:
