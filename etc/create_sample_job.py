@@ -11,6 +11,7 @@ job = {
     "flow": "ExecuteCommand",
     "object_type": "generic",
     "status": 'new',
+    "targeted_tags": ["sds_node"],
     "message": 'Executing command',
     "attributes": {
         "_raw_input": "ls"

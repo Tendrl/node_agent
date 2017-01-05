@@ -178,6 +178,9 @@ namespace.tendrl.node_agent:
         node_id:
           help: "Tendrl ID for the managed node"
           type: String
+        tags:
+          help: "List of tags attributed to this node"
+          type: List
       enabled: true
       value: nodes/$Node_context.node_id/Node_context
 namespace.tendrl.node_agent.gluster_integration:
@@ -189,6 +192,8 @@ namespace.tendrl.node_agent.gluster_integration:
         - tendrl.node_agent.objects.File.atoms.write
         - tendrl.node_agent.objects.Node.atoms.cmd
       description: "Import existing Gluster Cluster"
+      preferred_tags:
+        - "sds_node"
       enabled: true
       inputs:
         mandatory:
@@ -245,6 +250,8 @@ namespace.tendrl.node_agent.ceph_integration:
         - tendrl.node_agent.objects.File.atoms.write
         - tendrl.node_agent.objects.Node.atoms.cmd
       description: "Import existing Ceph Cluster"
+      preferred_tags:
+        - "monitor"
       enabled: true
       inputs:
         mandatory:
