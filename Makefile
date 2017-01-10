@@ -33,9 +33,9 @@ gitversion:
 	$(eval RELEASE := $(GIT_RELEASE).$(SHORTCOMMIT))
 	sed -i tendrl/node_agent/__init__.py \
 	  -e "s/^__version__ = .*/__version__ = '$(VERSION)'/"
-	sed -i tendrl-node-agent.spec \
+	sed -i node-agent.spec \
 	  -e "s/^Version: .*/Version: $(VERSION)/"
-	sed -i tendrl-node-agent.spec \
+	sed -i node-agent.spec \
 	  -e "s/^Release: .*/Release: $(RELEASE)/"
 
 snapshot: gitversion srpm
