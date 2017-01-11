@@ -26,7 +26,7 @@ def read_module_contents():
 
 
 def read_spec_contents():
-    with open('tendrl-node-agent.spec') as spec:
+    with open('node-agent.spec') as spec:
         return spec.read()
 
 module_file = read_module_contents()
@@ -65,7 +65,7 @@ class BumpVersionCommand(Command):
         old = 'Version: %s' % metadata['version']
         new = 'Version: %s' % self.version
         spec_file = read_spec_contents()
-        with open('tendrl-node-agent.spec', 'w') as fileh:
+        with open('node-agent.spec', 'w') as fileh:
             fileh.write(spec_file.replace(old, new))
 
         # Commit everything with a standard commit message
