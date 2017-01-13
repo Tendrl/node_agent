@@ -5,9 +5,9 @@ from gevent.server import StreamServer
 from io import BlockingIOError
 import json
 import logging
-from tendrl.common.alert import AlertUtils
-from tendrl.common.config import ConfigNotFound
-from tendrl.common.config import TendrlConfig
+from tendrl.commons.alert import AlertUtils
+from tendrl.commons.config import ConfigNotFound
+from tendrl.commons.config import TendrlConfig
 from tendrl.node_agent.alerts.base_alert_handler import AlertHandlerManager
 from tendrl.node_agent.alerts.base_alert_handler import NoHandlerException
 import tendrl.node_agent.manager.utils as utils

@@ -5,9 +5,9 @@ import inspect
 import logging
 import os
 import six
-from tendrl.common.alert import AlertUtils
-from tendrl.common.config import TendrlConfig
-from tendrl.common.singleton import to_singleton
+from tendrl.commons.alert import AlertUtils
+from tendrl.commons.config import TendrlConfig
+from tendrl.commons.singleton import to_singleton
 
 config = TendrlConfig("node-agent", "/etc/tendrl/tendrl.conf")
 LOG = logging.getLogger(__name__)
