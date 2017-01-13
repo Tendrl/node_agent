@@ -7,11 +7,13 @@ import tempfile
 sys.modules['tendrl.commons.config'] = MagicMock()
 sys.modules['tendrl.commons.log'] = MagicMock()
 sys.modules['tendrl.node_agent.persistence.persister'] = MagicMock()
+sys.modules['netaddr'] = MagicMock()
 from tendrl.commons.manager.rpc_job_process import RpcJobProcessThread
 from tendrl.node_agent.manager import manager
 del sys.modules['tendrl.commons.log']
 del sys.modules['tendrl.commons.config']
 del sys.modules['tendrl.node_agent.persistence.persister']
+del sys.modules['netaddr']
 
 
 class TestNodeAgentManager(object):
@@ -139,16 +141,77 @@ class TestNodeAgentSyncStateThread(object):
                                      'discard_zeroes_data': '0'
                                      }],
                           "free_disks_id": ["sdssds"],
-                          "used_disks_id": ["sadAS"]}
+                          "used_disks_id": ["sadAS"]},
+                "network": {"eth0": {"ipv4": ["10.70.1.1"],
+                                     "ipv6": "",
+                                     "netmask": ["255.255.1.1"],
+                                     "subnet": "10.10.10.1/24",
+                                     "status": "up",
+                                     "interface_id": "",
+                                     "sysfs_id": "",
+                                     "device_link": "",
+                                     "interface_type": "",
+                                     "model": "",
+                                     "driver_modules": "",
+                                     "driver": "",
+                                     "interface_name": "",
+                                     "hw_address": "",
+                                     "link_detected": ""
+                                     },
+                            "wlp3s0": {"ipv4": ["10.70.1.2"],
+                                       "ipv6": "",
+                                       "netmask": ["255.255.1.1"],
+                                       "subnet": "10.10.10.1/24",
+                                       "status": "up",
+                                       "interface_id": "",
+                                       "sysfs_id": "",
+                                       "device_link": "",
+                                       "interface_type": "",
+                                       "model": "",
+                                       "driver_modules": "",
+                                       "driver": "",
+                                       "interface_name": "",
+                                       "hw_address": "",
+                                       "link_detected": ""
+                                       }
+                            }
             })
         self.manager.etcd_client.delete = MagicMock()
-        self.manager.etcd_client.write = MagicMock()
+
+        def MockWrite(key, value):
+            if key == "networks/10.10.10.1_25":
+                self.network_value = value
+        monkeypatch.setattr(self.manager.etcd_client, "write", MockWrite)
+        obj = MagicMock()
+        obj.key = "/networks/10.10.10.1_25"
+        obj.value = '[{"ipv4": ["10.70.1.1"],' \
+                    ' "ipv6": "",' \
+                    ' "node_id": "1234-213-13-1212",' \
+                    '"netmask": ["255.255.1.1"],' \
+                    '"subnet": "10.10.10.1/25",' \
+                    ' "status": "up",' \
+                    ' "interface_id": "",' \
+                    ' "sysfs_id": "",' \
+                    ' "device_link": "",' \
+                    ' "interface_type": "",' \
+                    ' "model": "",' \
+                    ' "driver_modules": "",' \
+                    ' "driver": "",' \
+                    ' "interface_name": "",' \
+                    ' "hw_address": "",' \
+                    ' "link_detected": ""' \
+                    '}, ' \
+                    ']'
+        self.children = [obj]
+        self.manager.etcd_client.read = MagicMock(return_value=self)
         self.disk = False
 
         def mock_to_json_string(param):
             self.disk = True
         monkeypatch.setattr(
             manager.Disk, "to_json_string", mock_to_json_string)
+        self.network_called = False
+
         manager.pull_hardware_inventory.get_node_inventory = \
             MagicMock(return_value=node_inventory)
         self.tempdir = tempfile.mkdtemp()
@@ -162,6 +225,23 @@ class TestNodeAgentSyncStateThread(object):
         self.manager.persister_thread.update_memory.assert_called()
         self.manager.persister_thread.update_cpu.assert_called()
         assert self.disk
+        assert self.network_value == [
+            {'status': 'up',
+             'driver_modules': '',
+             'interface_type': '',
+             'model': '',
+             'driver': '',
+             'hw_address': '',
+             'interface_id': '',
+             'sysfs_id': '',
+             'node_id': '1234-213-13-1212',
+             'netmask': ['255.255.1.1'],
+             'ipv6': '',
+             'subnet': '10.10.10.1/25',
+             'ipv4': ['10.70.1.1'],
+             'link_detected': '',
+             'interface_name': '',
+             'device_link': ''}]
 
     def is_set(self):
         self.ret = not self.ret

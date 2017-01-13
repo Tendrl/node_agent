@@ -1,3 +1,4 @@
+import ast
 import etcd
 import json
 import logging
@@ -23,6 +24,7 @@ from tendrl.node_agent.manager import utils
 from tendrl.node_agent.persistence.cpu import Cpu
 from tendrl.node_agent.persistence.disk import Disk
 from tendrl.node_agent.persistence.memory import Memory
+from tendrl.node_agent.persistence.network import Network
 from tendrl.node_agent.persistence.node import Node
 from tendrl.node_agent.persistence.node_context import NodeContext
 from tendrl.node_agent.persistence.os import Os
@@ -239,6 +241,86 @@ class NodeAgentManager(Manager):
                 for disk in disks['free_disks_id']:
                     self.etcd_client.write(("nodes/%s/Disks/free/%s") % (
                         raw_data["node_id"], disk), "")
+
+        if "network" in raw_data:
+            LOG.info("on_pull, Updating network")
+            try:
+                # delete old node_wise network detail from etcd
+                self.etcd_client.delete(
+                    ("nodes/%s/Networks") %
+                    raw_data["node_id"], recursive=True)
+            except etcd.EtcdKeyNotFound as ex:
+                LOG.debug("Given key is not present in etcd . %s", ex)
+            interfaces = raw_data['network']
+            subnet_wise_network_details = {}
+            for ni in interfaces:
+                interfaces[ni]["node_id"] = raw_data["node_id"]
+                network = Network(interfaces[ni])
+                interface_json_str = network.to_json_string()
+                # push newly collected node wise network detail in etcd
+                self.etcd_client.write(
+                    (network.__name__) % (raw_data['node_id'], ni),
+                    interface_json_str
+                )
+                # Grouping all network details as subnet wise
+                subnet = interfaces[ni]["subnet"]
+                subnet = subnet.replace("/", "_")
+                if subnet in subnet_wise_network_details:
+                    subnet_wise_network_details[subnet].append(
+                        interface_json_str)
+                elif subnet != "":
+                    subnet_wise_network_details[subnet] = []
+                    subnet_wise_network_details[subnet].append(
+                        interface_json_str)
+            # Remove this node related network detail from global network
+            global_network_details = \
+                self.remove_network_details(raw_data["node_id"])
+            # Push newly grouped network details in global network using subnet
+            for subnet in subnet_wise_network_details:
+                if subnet in global_network_details:
+                    global_network_details[subnet].extend(
+                        subnet_wise_network_details[subnet])
+                else:
+                    global_network_details[subnet] = \
+                        subnet_wise_network_details[subnet]
+            for network in global_network_details:
+                self.etcd_client.write(
+                    ("networks/%s") % (network),
+                    global_network_details[network]
+                )
+
+    def remove_network_details(self, node_id):
+        global_network_details = {}
+        try:
+            networks_detail = self.etcd_client.read(
+                "/networks", recursive=True)
+            for network_detail in networks_detail.children:
+                """ converting unicode to list
+
+                unicode: u'['{"status": "up/down", "subnet": "",
+                         "netmask": [], "node_id": "", "ipv4": [],
+                         "ipv6": [], "interface": "eth0"....}']'
+                list: ['{"status": "up/down", "subnet": "",
+                         "netmask": [], "node_id": "", "ipv4": [],
+                         "ipv6": [], "interface": "eth0"....}'] """
+                network_list = ast.literal_eval(network_detail.value)
+                for network in network_list:
+                    other_network_details = []
+                    # converting string to json to compare node_id
+                    network_json = json.loads(network)
+                    if network_json["node_id"] != node_id:
+                        other_network_details.append(network)
+                # if particular subnet contains no entry then delete
+                if other_network_details == []:
+                    self.etcd_client.delete(network_detail.key)
+                else:
+                    # All network details except this node
+                    global_network_details[
+                        str(network_detail.key).split(
+                            "/")[-1]] = other_network_details
+        except etcd.EtcdKeyNotFound as ex:
+            LOG.debug(ex)
+        return global_network_details
 
 
 def main():
