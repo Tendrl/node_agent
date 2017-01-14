@@ -3,7 +3,6 @@ import gevent.event
 import gevent.greenlet
 from gevent.server import StreamServer
 from io import BlockingIOError
-import json
 import logging
 from tendrl.commons.alert import AlertUtils
 from tendrl.commons.config import ConfigNotFound
@@ -12,6 +11,7 @@ from tendrl.node_agent.alerts.base_alert_handler import AlertHandlerManager
 from tendrl.node_agent.alerts.base_alert_handler import NoHandlerException
 import tendrl.node_agent.manager.utils as utils
 import uuid
+import yaml
 
 config = TendrlConfig("node-agent", "/etc/tendrl/tendrl.conf")
 LOG = logging.getLogger(__name__)
@@ -24,7 +24,7 @@ class AlertsManager(gevent.greenlet.Greenlet):
         try:
             data = sock.recv(RECEIVE_DATA_SIZE)
             alert_utils = AlertUtils()
-            alert_json = json.loads(data)
+            alert_json = yaml.safe_load(data)
             alert_json['alert_id'] = str(uuid.uuid4())
             alert_json['significance'] = 'HIGH'
             alert_json['node_id'] = utils.get_local_node_context()
