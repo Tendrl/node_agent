@@ -7,8 +7,13 @@ import tempfile
 sys.modules['tendrl.commons.config'] = MagicMock()
 sys.modules['tendrl.commons.log'] = MagicMock()
 sys.modules['tendrl.node_agent.persistence.persister'] = MagicMock()
+sys.modules[
+    'tendrl.node_agent.discovery_modules.platform.manager'] = MagicMock()
+sys.modules['tendrl.node_agent.discovery_modules.platform.base'] = MagicMock()
 from tendrl.commons.manager.rpc_job_process import RpcJobProcessThread
 from tendrl.node_agent.manager import manager
+del sys.modules['tendrl.node_agent.discovery_modules.platform.base']
+del sys.modules['tendrl.node_agent.discovery_modules.platform.manager']
 del sys.modules['tendrl.commons.log']
 del sys.modules['tendrl.commons.config']
 del sys.modules['tendrl.node_agent.persistence.persister']
@@ -41,6 +46,23 @@ class TestNodeAgentManager(object):
         self.manager.persister_thread.update_node_context.assert_called()
         self.manager.persister_thread.update_node_context.assert_called()
         self.manager.persister_thread.update_tendrl_definitions.assert_called()
+
+    def test_load_and_execute_discovery_plugins(self, monkeypatch):
+        def Mock_plugin():
+            raise ValueError
+        monkeypatch.setattr(manager.PlatformBasePlugin, "plugins", Mock_plugin)
+        obj = MagicMock()
+        manager.PlatformBasePlugin.plugins = [obj]
+        obj.discover_platform = MagicMock(
+            return_value=({"Name": "centos",
+                           "OSVersion": "7",
+                           "KernelVersion": "0.1"
+                           })
+            )
+        self.manager.load_and_execute_discovery_plugins("1234-123-1234-1123")
+        assert str(manager.Platform.os.value) == "centos"
+        assert str(manager.Platform.os_version.value) == "7"
+        assert str(manager.Platform.kernel_version.value) == "0.1"
 
 
 class TestNodeAgentSyncStateThread(object):

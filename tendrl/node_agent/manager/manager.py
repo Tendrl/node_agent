@@ -13,9 +13,11 @@ from tendrl.commons.config import TendrlConfig
 from tendrl.commons.log import setup_logging
 from tendrl.commons.manager.manager import Manager
 from tendrl.commons.manager.manager import SyncStateThread
+from tendrl.node_agent.discovery_modules.platform.base import \
+    PlatformBasePlugin
+from tendrl.node_agent.discovery_modules.platform.manager import \
+    PlatformManager
 from tendrl.node_agent.persistence.tendrl_definitions import TendrlDefinitions
-
-config = TendrlConfig("node-agent", "/etc/tendrl/tendrl.conf")
 
 from tendrl.node_agent.manager.tendrl_definitions_node_agent import data as \
     def_data
@@ -27,8 +29,10 @@ from tendrl.node_agent.persistence.node import Node
 from tendrl.node_agent.persistence.node_context import NodeContext
 from tendrl.node_agent.persistence.os import Os
 from tendrl.node_agent.persistence.persister import NodeAgentEtcdPersister
+from tendrl.node_agent.persistence.platform import Platform
 from tendrl.node_agent.persistence.tendrl_context import TendrlContext
 
+config = TendrlConfig("node-agent", "/etc/tendrl/tendrl.conf")
 LOG = logging.getLogger(__name__)
 HARDWARE_INVENTORY_FILE = "/etc/tendrl/tendrl-node-inventory.json"
 
@@ -114,6 +118,7 @@ class NodeAgentManager(Manager):
             node_id=node_id,
         )
         self.register_node(machine_id)
+        self.load_and_execute_discovery_plugins(node_id)
 
     def register_node(self, machine_id):
         self.persister_thread.update_node_context(
@@ -239,6 +244,31 @@ class NodeAgentManager(Manager):
                 for disk in disks['free_disks_id']:
                     self.etcd_client.write(("nodes/%s/Disks/free/%s") % (
                         raw_data["node_id"], disk), "")
+
+    def load_and_execute_discovery_plugins(self, node_id):
+        # platform plugins
+        LOG.info("load_and_execute_discovery_plugins, platform plugins")
+        pMgr = PlatformManager()
+        pMgr.load_plugins()
+        # execute the platform plugins
+        for plugin in PlatformBasePlugin.plugins:
+            platform_details = plugin.discover_platform()
+            if len(platform_details.keys()) > 0:
+                # update etcd
+                try:
+                    self.persister_thread.update_platform(
+                        Platform(
+                            updated=str(time.time()),
+                            os=platform_details["Name"],
+                            os_version=platform_details["OSVersion"],
+                            kernel_version=platform_details["KernelVersion"],
+                            node_id=node_id,
+                        )
+                    )
+                except etcd.EtcdException as ex:
+                    LOG.error(
+                        'Failed to update etcd  %s. \Error %s' % str(ex))
+                break
 
 
 def main():
