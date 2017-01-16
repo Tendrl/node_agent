@@ -14,6 +14,7 @@ from tendrl.commons.config import TendrlConfig
 from tendrl.commons.log import setup_logging
 from tendrl.commons.manager.manager import Manager
 from tendrl.commons.manager.manager import SyncStateThread
+from tendrl.node_agent.discovery.platform.manager import PlatformManager
 from tendrl.node_agent.discovery.sds.manager import SDSDiscoveryManager
 from tendrl.node_agent.persistence.tendrl_definitions import TendrlDefinitions
 
@@ -26,12 +27,10 @@ from tendrl.node_agent.persistence.memory import Memory
 from tendrl.node_agent.persistence.node import Node
 from tendrl.node_agent.persistence.node_context import NodeContext
 from tendrl.node_agent.persistence.os import Os
-from tendrl.node_agent.persistence.platform import Platform
 from tendrl.node_agent.persistence.persister import NodeAgentEtcdPersister
+from tendrl.node_agent.persistence.platform import Platform
 from tendrl.node_agent.persistence.service import Service
 from tendrl.node_agent.persistence.tendrl_context import TendrlContext
-from tendrl.node_agent.discovery.platform.manager import PlatformManager
-from tendrl.node_agent.discovery.platform.base import PlatformDiscoverPlugin
 
 config = TendrlConfig("node-agent", "/etc/tendrl/tendrl.conf")
 LOG = logging.getLogger(__name__)
@@ -169,7 +168,7 @@ class NodeAgentManager(Manager):
         tag_set = set(tags)
         tags = ",".join(tag_set)
         update_node_context(self, utils.get_machine_id(), tags)
-        
+
         LOG.info("on_pull, Updating node data")
         self.persister_thread.update_node(
             Node(
