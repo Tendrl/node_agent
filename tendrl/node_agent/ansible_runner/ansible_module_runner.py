@@ -2,10 +2,10 @@ import ansible.executor.module_common as module_common
 from ansible import modules
 import os
 import subprocess
-from tendrl.commons.config import TendrlConfig
+from tendrl.commons.config import load_config
 import uuid
 
-config = TendrlConfig("node-agent", "/etc/tendrl/tendrl.conf")
+config = load_config("node-agent", "/etc/tendrl/node-agent/node-agent.yaml")
 
 try:
     import json
@@ -25,10 +25,9 @@ class AnsibleRunner(object):
 
     """
     def __init__(self, module_path, **kwargs):
-        self.executable_module_path = config.get(
-            "node-agent",
-            "tendrl_exe_file_prefix"
-        ) + str(uuid.uuid4())
+        self.executable_module_path =\
+            config["configuration"]["tendrl_exe_file_prefix"] + \
+            str(uuid.uuid4())
         self.module_path = modules.__path__[0] + "/" + module_path
         if not os.path.isfile(self.module_path):
             raise ValueError

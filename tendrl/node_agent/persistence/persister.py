@@ -1,10 +1,15 @@
+from tendrl.commons.etcdobj.etcdobj import Server as etcd_server
 from tendrl.commons.persistence.etcd_persister import EtcdPersister
 
 
 class NodeAgentEtcdPersister(EtcdPersister):
-    def __init__(self, config):
-        super(NodeAgentEtcdPersister, self).__init__(config)
-        self._store = self.get_store()
+    def __init__(self, config, etcd_client):
+        super(NodeAgentEtcdPersister, self).__init__(etcd_client)
+        etcd_kwargs = {
+            'port': int(config["configuration"]["etcd_port"]),
+            'host': config["configuration"]["etcd_connection"]
+        }
+        self._store = etcd_server(etcd_kwargs=etcd_kwargs)
 
     def update_cpu(self, cpu):
         self._store.save(cpu)

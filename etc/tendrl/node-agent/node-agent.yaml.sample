@@ -1,0 +1,13 @@
+---
+ configuration:
+     # Central store etcd port
+     etcd_port: 2379
+     # Central store etcd host/ip
+     etcd_connection: 0.0.0.0
+     tendrl_exe_file_prefix: $HOME/.tendrl/util_runner_
+     # Path to log file
+     log_cfg_path: /etc/tendrl/node-agent_logging.yaml
+     log_level: DEBUG
+     # installation_source_type decides how tendrl will install a software
+     # the possible values are pip, rpm, deb.
+     installation_source_type: rpm

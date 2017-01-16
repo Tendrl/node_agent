@@ -10,10 +10,11 @@ import gevent.greenlet
 import pull_hardware_inventory
 from pull_service_status import TENDRL_SERVICE_TAGS
 
-from tendrl.commons.config import TendrlConfig
+from tendrl.commons.config import load_config
 from tendrl.commons.log import setup_logging
 from tendrl.commons.manager.manager import Manager
 from tendrl.commons.manager.manager import SyncStateThread
+from tendrl.node_agent.discovery.platform.manager import PlatformManager
 from tendrl.node_agent.discovery.sds.manager import SDSDiscoveryManager
 from tendrl.node_agent.persistence.tendrl_definitions import TendrlDefinitions
 
@@ -26,14 +27,12 @@ from tendrl.node_agent.persistence.memory import Memory
 from tendrl.node_agent.persistence.node import Node
 from tendrl.node_agent.persistence.node_context import NodeContext
 from tendrl.node_agent.persistence.os import Os
-from tendrl.node_agent.persistence.platform import Platform
 from tendrl.node_agent.persistence.persister import NodeAgentEtcdPersister
+from tendrl.node_agent.persistence.platform import Platform
 from tendrl.node_agent.persistence.service import Service
 from tendrl.node_agent.persistence.tendrl_context import TendrlContext
-from tendrl.node_agent.discovery.platform.manager import PlatformManager
-from tendrl.node_agent.discovery.platform.base import PlatformDiscoverPlugin
 
-config = TendrlConfig("node-agent", "/etc/tendrl/tendrl.conf")
+config = load_config("node-agent", "/etc/tendrl/node-agent/node-agent.yaml")
 LOG = logging.getLogger(__name__)
 HARDWARE_INVENTORY_FILE = "/etc/tendrl/tendrl-node-inventory.json"
 
@@ -108,8 +107,8 @@ class NodeAgentManager(Manager):
         self._complete = gevent.event.Event()
         # Initialize the state sync thread which gets the underlying
         # node details and pushes the same to etcd
-        etcd_kwargs = {'port': int(config.get("commons", "etcd_port")),
-                       'host': config.get("commons", "etcd_connection")}
+        etcd_kwargs = {'port': int(config["configuration"]["etcd_port"]),
+                       'host': config["configuration"]["etcd_connection"]}
         self.etcd_client = etcd.Client(**etcd_kwargs)
         local_node_context = utils.set_local_node_context()
         if local_node_context:
@@ -126,7 +125,7 @@ class NodeAgentManager(Manager):
             node_id,
             config,
             NodeAgentSyncStateThread(self),
-            NodeAgentEtcdPersister(config),
+            NodeAgentEtcdPersister(config, self.etcd_client),
             "/tendrl_definitions_node_agent/data",
             node_id=node_id
         )
@@ -169,7 +168,7 @@ class NodeAgentManager(Manager):
         tag_set = set(tags)
         tags = ",".join(tag_set)
         update_node_context(self, utils.get_machine_id(), tags)
-        
+
         LOG.info("on_pull, Updating node data")
         self.persister_thread.update_node(
             Node(
@@ -341,8 +340,7 @@ class NodeAgentManager(Manager):
 
 def main():
     setup_logging(
-        config.get('node-agent', 'log_cfg_path'),
-        config.get('node-agent', 'log_level')
+        config['configuration']['log_cfg_path']
     )
 
     machine_id = utils.get_machine_id()
