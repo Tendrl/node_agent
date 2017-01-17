@@ -1,14 +1,14 @@
 from tendrl.commons.utils.service_status import ServiceStatus
 
 TENDRL_SERVICE_TAGS = {
-    "tendrl-node-agent": "TENDRL",
-    "etcd": "TENDRL_SERVER",
-    "tendrl-apid": "TENDRL_SERVER",
-    "tendrl-gluster-integration": "TENDRL_GLUSTER",
-    "tendrl-ceph-integration": "TENDRL_CEPH",
-    "glusterd": "GLUSTER",
-    "ceph-mon": "CEPH_MON",
-    "ceph-osd": "CEPH_OSD"
+    "tendrl-node-agent": "TENDRL/NODE",
+    "etcd": "TENDRL/SERVER",
+    "tendrl-apid": "TENDRL/SERVER",
+    "tendrl-gluster-integration": "TENDRL/INTEGRATION/GLUSTER",
+    "tendrl-ceph-integration": "TENDRL/INTEGRATION/CEPH",
+    "glusterd": "GLUSTER/SERVER",
+    "ceph-mon": "CEPH/MON",
+    "ceph-osd": "CEPH/OSD"
 }
 
 TENDRL_SERVICES = [
