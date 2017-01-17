@@ -429,6 +429,9 @@ namespace.tendrl.node_agent.gluster_integration:
         - tendrl.node_agent.objects.File.atoms.write
         - tendrl.node_agent.objects.Node.atoms.cmd
       help: "Import existing Gluster Cluster"
+      preferred_tags:
+        - "gluster/server"
+        - "tendrl/node"
       enabled: true
       inputs:
         mandatory:
@@ -506,6 +509,9 @@ namespace.tendrl.node_agent.ceph_integration:
         - tendrl.node_agent.objects.File.atoms.write
         - tendrl.node_agent.objects.Node.atoms.cmd
       help: "Import existing Ceph Cluster"
+      preferred_tags:
+        - "ceph/mon"
+        - "tendrl/node"
       enabled: true
       inputs:
         mandatory:

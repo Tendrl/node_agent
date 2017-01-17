@@ -11,6 +11,7 @@ job = {
     "flow": "ExecuteCommand",
     "object_type": "generic",
     "status": 'new',
+    "targeted_tags": ["tendrl/node"],  # please refer flow defn. for this flow
     "message": 'Executing command',
     "attributes": {
         "_raw_input": "ls"
