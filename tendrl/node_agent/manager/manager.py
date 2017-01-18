@@ -13,10 +13,9 @@ from tendrl.commons.config import load_config
 from tendrl.commons.etcdobj import etcdobj
 from tendrl.commons.log import setup_logging
 from tendrl.commons.manager import manager as common_manager
+from tendrl.node_agent.alerts.alert_socket import AlertsManager
 from tendrl.node_agent.discovery.platform.manager import PlatformManager
 from tendrl.node_agent.discovery.sds.manager import SDSDiscoveryManager
-from tendrl.node_agent.manager.tendrl_definitions_node_agent import data as \
-    def_data
 from tendrl.node_agent.manager import utils
 from tendrl.node_agent.persistence.cpu import Cpu
 from tendrl.node_agent.persistence.disk import Disk
@@ -28,7 +27,6 @@ from tendrl.node_agent.persistence.persister import NodeAgentEtcdPersister
 from tendrl.node_agent.persistence.platform import Platform
 from tendrl.node_agent.persistence.service import Service
 from tendrl.node_agent.persistence.tendrl_context import TendrlContext
-from tendrl.node_agent.persistence.tendrl_definitions import TendrlDefinitions
 
 config = load_config("node-agent",
                      "/etc/tendrl/node-agent/node-agent.conf.yaml")
@@ -123,6 +121,19 @@ class NodeAgentManager(common_manager.Manager):
         self.register_node(machine_id)
         self.load_and_execute_platform_discovery_plugins()
         self.load_and_execute_sds_discovery_plugins()
+        self._alerts_manager = AlertsManager(
+            config['configuration']['tendrl_alerts_socket_addr'],
+            config['configuration']['tendrl_alerts_socket_port'],
+            self.etcd_orm.client
+        )
+
+    def start(self):
+        super(NodeAgentManager, self).start()
+        self._alerts_manager.start()
+
+    def stop(self):
+        super(NodeAgentManager, self).stop()
+        self._alerts_manager.stop()
 
     def register_node(self, machine_id):
         update_node_context(self, machine_id)
@@ -143,8 +154,7 @@ class NodeAgentManager(common_manager.Manager):
                 status="UP"
             )
         )
-        self.persister_thread.update_tendrl_definitions(TendrlDefinitions(
-            updated=str(time.time()), data=def_data))
+        self.persister_thread.append_definitions()
 
     def on_pull(self, raw_data):
         LOG.info("on_pull, Updating Node_context data")

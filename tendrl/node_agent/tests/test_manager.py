@@ -42,7 +42,7 @@ class TestNodeAgentManager(object):
     def test_register_node(self):
         self.manager.persister_thread.update_node_context.assert_called()
         self.manager.persister_thread.update_node_context.assert_called()
-        self.manager.persister_thread.update_tendrl_definitions.assert_called()
+        self.manager.persister_thread.append_definitions.assert_called()
 
 
 class TestNodeAgentSyncStateThread(object):
