@@ -4,21 +4,14 @@ import sys
 sys.modules['tendrl.commons.config'] = MagicMock()
 sys.modules['tendrl.commons.log'] = MagicMock()
 from tendrl.node_agent.alerts.alert_socket import AlertsManager
-from tendrl.node_agent.alerts.alert_socket import config
 del sys.modules['tendrl.commons.log']
 del sys.modules['tendrl.commons.config']
 
 
 class TestAlertsManager(object):
     def test_constructor(self, monkeypatch):
-        def mock_config(package, parameter):
-            if parameter == "tendrl_alerts_socket_port":
-                return '12345'
-            if parameter == 'tendrl_alerts_socket_addr':
-                return '0.0.0.0'
-
-        monkeypatch.setattr(config, 'get', mock_config)
-        manager = AlertsManager()
+        etcd_client = MagicMock()
+        manager = AlertsManager('0.0.0.0', '12345', etcd_client)
         assert isinstance(manager.hostname, str)
         assert isinstance(manager.port, str)
         assert isinstance(manager.server, StreamServer)
@@ -26,14 +19,8 @@ class TestAlertsManager(object):
         manager.stop()
 
     def test_start(self, monkeypatch):
-        def mock_config(package, parameter):
-            if parameter == "tendrl_alerts_socket_port":
-                return '12345'
-            if parameter == 'tendrl_alerts_socket_addr':
-                return '0.0.0.0'
-
-        monkeypatch.setattr(config, 'get', mock_config)
-        manager = AlertsManager()
+        etcd_client = MagicMock()
+        manager = AlertsManager('0.0.0.0', '12345', etcd_client)
 
         def mock_start():
             return
@@ -44,14 +31,8 @@ class TestAlertsManager(object):
         manager.stop()
 
     def test_stop(self, monkeypatch):
-        def mock_config(package, parameter):
-            if parameter == "tendrl_alerts_socket_port":
-                return '12345'
-            if parameter == 'tendrl_alerts_socket_addr':
-                return '0.0.0.0'
-
-        monkeypatch.setattr(config, 'get', mock_config)
-        manager = AlertsManager()
+        etcd_client = MagicMock()
+        manager = AlertsManager('0.0.0.0', '12345', etcd_client)
 
         def mock_stop():
             return

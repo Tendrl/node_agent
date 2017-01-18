@@ -124,7 +124,7 @@ class NodeAgentManager(common_manager.Manager):
         self._alerts_manager = AlertsManager(
             config['configuration']['tendrl_alerts_socket_addr'],
             config['configuration']['tendrl_alerts_socket_port'],
-            self.etcd_client
+            self.etcd_orm.client
         )
 
     def start(self):

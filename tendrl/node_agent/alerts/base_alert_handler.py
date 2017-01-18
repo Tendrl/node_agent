@@ -6,10 +6,8 @@ import logging
 import os
 import six
 from tendrl.commons.alert import AlertUtils
-from tendrl.commons.config import TendrlConfig
 from tendrl.commons.singleton import to_singleton
 
-config = TendrlConfig("node-agent", "/etc/tendrl/tendrl.conf")
 LOG = logging.getLogger(__name__)
 
 
@@ -37,32 +35,43 @@ class AlertHandler(object):
         self.alert = None
         self.handles = ''
 
-    def update_alert(self):
+    def update_alert(self, etcd_client):
         # Fetch alerts in etcd
         try:
-            alerts = AlertUtils().get_alerts()
+            alerts = AlertUtils(etcd_client).get_alerts()
             # Check if similar alert already exists
             for curr_alert in alerts:
                 # If similar alert exists, update the similar alert to etcd
-                if AlertUtils().is_same(self.alert, curr_alert):
-                    self.alert = AlertUtils().update(self.alert, curr_alert)
-                    AlertUtils().store_alert(self.alert)
+                if AlertUtils(etcd_client).is_same(self.alert, curr_alert):
+                    self.alert = AlertUtils(
+                        etcd_client
+                    ).update(
+                        self.alert,
+                        curr_alert
+                    )
+                    if not AlertUtils(
+                        etcd_client
+                    ).equals(
+                        self.alert,
+                        curr_alert
+                    ):
+                        AlertUtils(etcd_client).store_alert(self.alert)
                     return
                 # else add this new alert to etcd
-            AlertUtils().store_alert(self.alert)
+            AlertUtils(etcd_client).store_alert(self.alert)
         except etcd.EtcdKeyNotFound:
-            AlertUtils().store_alert(self.alert)
+            AlertUtils(etcd_client).store_alert(self.alert)
         except etcd.EtcdConnectionFailed as ex:
             LOG.error(
                 'Failed to fetch existing alerts.Error %s' % ex,
                 exc_info=True
             )
 
-    def handle(self, alert_obj):
+    def handle(self, alert_obj, etcd_client):
         try:
             self.alert = alert_obj
             self.alert.significance = 'HIGH'
-            self.update_alert()
+            self.update_alert(etcd_client)
         except Exception as ex:
             LOG.error(
                 'Failed to handle the alert %s.Error %s'
@@ -89,14 +98,10 @@ class AlertHandlerManager(object):
                       ex, exc_info=True)
             raise ex
 
-    def __init__(self):
+    def __init__(self, etcd_client):
         try:
             self.load_handlers()
-            etcd_kwargs = {
-                'port': int(config.get("commons", "etcd_port")),
-                'host': config.get("commons", "etcd_connection")
-            }
-            self.etcd_client = etcd.Client(**etcd_kwargs)
+            self.etcd_client = etcd_client
             alert_handlers = []
             for handler in AlertHandler.handlers:
                 alert_handlers.append(handler.handles)
@@ -110,7 +115,7 @@ class AlertHandlerManager(object):
     def handle(self, alert):
         for handler in AlertHandler.handlers:
             if handler.handles == alert.resource:
-                handler.handle(alert)
+                handler.handle(alert, self.etcd_client)
                 return
         raise NoHandlerException(
             'No alert handler defined for %s and hence cannot handle alert %s'
