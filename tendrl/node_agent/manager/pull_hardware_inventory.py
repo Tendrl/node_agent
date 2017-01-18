@@ -35,7 +35,6 @@ def getNodeCpu():
     '''
     cmd = cmd_utils.Command("lscpu")
     out, err, rc = cmd.run(config['tendrl_ansible_exec_file'])
-    out = out['stdout']
     if out:
         info_list = out.split('\n')
         cpuinfo = {
@@ -72,7 +71,6 @@ def getNodeMemory():
 
     cmd = cmd_utils.Command("cat /proc/meminfo")
     out, err, rc = cmd.run(config['tendrl_ansible_exec_file'])
-    out = out['stdout']
 
     if out:
         info_list = out.split('\n')
@@ -92,7 +90,7 @@ def getNodeMemory():
 def getNodeOs():
     cmd = cmd_utils.Command("getenforce")
     out, err, rc = cmd.run(config['tendrl_ansible_exec_file'])
-    se_out = out['stdout']
+    se_out = out
 
     os_out = platform.linux_distribution()
 
@@ -111,16 +109,16 @@ def getTendrlContext():
     tendrl_context = {"sds_name": "", "sds_version": ""}
     cmd = cmd_utils.Command("gluster --version")
     out, err, rc = cmd.run(config['tendrl_ansible_exec_file'])
-    if out["rc"] == 0:
-        nvr = out['stdout']
+    if rc == 0:
+        nvr = out
         tendrl_context["sds_name"] = nvr.split()[0]
         tendrl_context["sds_version"] = nvr.split()[1]
         return tendrl_context
 
     cmd = cmd_utils.Command("ceph --version")
     out, err, rc = cmd.run(config['tendrl_ansible_exec_file'])
-    if out["rc"] == 0:
-        nvr = out['stdout']
+    if rc == 0:
+        nvr = out
         tendrl_context["sds_name"] = nvr.split()[0]
         tendrl_context["sds_version"] = nvr.split()[2].split("-")[0]
 
@@ -145,9 +143,9 @@ def get_node_disks():
         cmd = cmd_utils.Command(lsblk)
         out, err, rc = cmd.run(config['tendrl_ansible_exec_file'])
         if not err:
-            if not out['stderr']:
+            if out:
                 devlist = map(lambda line: dict(zip(keys, line.split(' '))),
-                              out['stdout'].splitlines())
+                              out.splitlines())
                 for disk in disks:
                     for dev_info in devlist:
                         if dev_info['NAME'] == disk['device_name']:
@@ -192,8 +190,6 @@ def get_node_disks():
                                 rv['free_disks_id'].append(disk['disk_id'])
                             else:
                                 rv['used_disks_id'].append(disk['disk_id'])
-            else:
-                LOG.error(out['stderr'])
         else:
             LOG.error(err)
     else:
@@ -207,8 +203,7 @@ def get_all_disks():
     cmd = cmd_utils.Command('hwinfo --block')
     out, err, rc = cmd.run(config['tendrl_ansible_exec_file'])
     if not err:
-        if not out['stderr']:
-            out = out['stdout']
+        if out:
             all_disks = []
             parents = []
             for blocks in out.split('\n\n'):
@@ -313,8 +308,6 @@ def get_all_disks():
                 if not disk["disk_id"] in parents:
                     disk["used"] = False
                     disks.append(disk)
-        else:
-            err = out['stderr']
     return disks, err
 
 
@@ -333,7 +326,6 @@ def get_node_inventory():
     node_inventory = {}
     cmd = cmd_utils.Command("cat /etc/machine-id")
     out, err, rc = cmd.run(config['tendrl_ansible_exec_file'])
-    out = out['stdout']
 
     node_inventory["machine_id"] = out
 
