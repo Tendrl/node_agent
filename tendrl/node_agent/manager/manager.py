@@ -116,8 +116,8 @@ class NodeAgentManager(common_manager.Manager):
             node_id,
             config,
             NodeAgentSyncStateThread(self),
-            NodeAgentEtcdPersister(config),
-            "/tendrl_definitions_node_agent/data",
+            NodeAgentEtcdPersister(self.etcd_orm),
+            "/tendrl_definitions_node-agent/data",
             node_id=node_id
         )
         self.register_node(machine_id)
@@ -333,7 +333,6 @@ class NodeAgentManager(common_manager.Manager):
 def main():
     setup_logging(
         config['log_cfg_path'],
-        config['log_level']
     )
 # init definitions
 # init manager and object tree from etcd
