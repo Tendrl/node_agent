@@ -4,6 +4,7 @@ from tendrl.commons.utils import ansible_module_runner
 
 class Install(base_atom.BaseAtom):
     def run(self):
+        return True
         name = self.parameters.get("Package.name")
         package_type = self.parameters.get("Package.pkg_type", "pip")
         version = self.parameters.get("Package.version", None)

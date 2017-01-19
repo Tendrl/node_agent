@@ -2,8 +2,14 @@ import json
 import socket
 import uuid
 
+from tendrl.commons.config import load_config
 from tendrl.commons.flows import base_flow
 from tendrl.node_agent.manager import utils as manager_utils
+
+config = load_config(
+    "node-agent",
+    "/etc/tendrl/node-agent/node-agent.conf.yaml"
+)
 
 
 def get_package_name(installation_source_type):
@@ -41,16 +47,10 @@ class ImportCluster(base_flow.BaseFlow):
                                                json.dumps(job))
         if curr_node_id in node_list:
             self.parameters['fqdn'] = socket.getfqdn()
-            installation_source_type = self.config.get(
-                "node-agent",
-                "installation_source_type"
-            )
+            installation_source_type = config["installation_source_type"]
             self.parameters['Package.pkg_type'] = installation_source_type
             self.parameters['Package.name'] = get_package_name(
                 installation_source_type)
-            self.parameters['Node.cmd_str'] = "tendrl-gluster-integration " \
-                                              "--cluster-id %s" % \
-                                              cluster_id
             tendrl_context = "nodes/%s/Tendrl_context/cluster_id" % \
                              curr_node_id
             self.etcd_orm.client.write(tendrl_context, cluster_id)

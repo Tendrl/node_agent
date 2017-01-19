@@ -4,12 +4,12 @@ from tendrl.commons.atoms import base_atom
 
 
 class Compare(base_atom.BaseAtom):
-    def run(self, parameters):
-        sds_name = parameters.get("Tendrl_context.sds_name")
-        sds_version = parameters.get("Tendrl_context.sds_version")
+    def run(self):
+        sds_name = self.parameters.get("Tendrl_context.sds_name")
+        sds_version = self.parameters.get("Tendrl_context.sds_version")
         return True
 
-        etcd_orm = parameters['etcd_orm']
+        etcd_orm = self.parameters['etcd_orm']
         # get the node-agent_key some how
         # for now reading it from the json file
 
@@ -26,7 +26,7 @@ class Compare(base_atom.BaseAtom):
                 etcd_sds_name = el.value
             if el.key.split('/')[-1] == "sds_version":
                 etcd_sds_version = el.value
-        status = parameters.get("status")
+        status = self.parameters.get("status")
         if etcd_sds_version == sds_version and etcd_sds_name == sds_name:
             status.append(
                 ("Compare",

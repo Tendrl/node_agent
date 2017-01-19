@@ -37,7 +37,7 @@ class TestNodeAgentManager(object):
             self.manager._discovery_thread,
             SyncStateThread
         )
-        assert self.manager.defs_dir == "/tendrl_definitions_node_agent/data"
+        assert self.manager.defs_dir == "/tendrl_definitions_node-agent/data"
 
     def test_register_node(self):
         self.manager.persister_thread.update_node_context.assert_called()

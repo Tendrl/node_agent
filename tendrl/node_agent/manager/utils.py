@@ -44,9 +44,9 @@ def delete_local_node_context():
 
 
 def get_machine_id():
-    cmd = cmd_utils.Command({"_raw_params": "cat /etc/machine-id"})
+    cmd = cmd_utils.Command("cat /etc/machine-id")
     out, err, rc = cmd.run(config['tendrl_ansible_exec_file'])
-    return out['stdout']
+    return out
 
 
 def get_node_context(etcd_orm, local_node_context):
