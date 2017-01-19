@@ -32,3 +32,6 @@ class NodeAgentEtcdPersister(EtcdPersister):
 
     def update_platform(self, platform):
         self._store.save(platform)
+
+    def save_detected_cluster(self, detected_cluster):
+        tendrl_ns.etcd_orm.save(detected_cluster)
