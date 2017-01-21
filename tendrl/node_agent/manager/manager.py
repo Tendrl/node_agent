@@ -311,22 +311,16 @@ class NodeAgentManager(common_manager.Manager):
                     dict = {}
                     for key in sds_details['cluster_attrs'].keys():
                         dict[key] = sds_details['cluster_attrs'][key]
-                    try:
-                        self.persister_thread.update_node_context(
-                            NodeContext(
-                                updated=str(time.time()),
-                                node_id=utils.get_local_node_context(),
+                        detected_cluster =\
+                            tendrl_ns.node_agent.objects.DetectedCluster(
+                                id=sds_details[
+                                    'detected_cluster_id'
+                                    ],
                                 sds_pkg_name=sds_details['pkg_name'],
                                 sds_pkg_version=sds_details['pkg_version'],
-                                detected_cluster_id=sds_details[
-                                    'detected_cluster_id'
-                                ],
-                                cluster_attrs=dict
-                            )
-                        )
-                    except etcd.EtcdException as ex:
-                        LOG.error('Failed to update etcd . \Error %s' % str(
-                            ex))
+                                node_id=self.node_id
+                                )
+                        detected_cluster.save(tendrl_ns.etcd_orm)
                     break
 
 
