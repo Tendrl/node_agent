@@ -2,7 +2,7 @@ from tendrl.commons.utils.service_status import ServiceStatus
 
 TENDRL_SERVICE_TAGS = {
     "tendrl-node-agent": "tendrl/node",
-    "etcd": "tendrl/server",
+    "etcd": "tendrl/central-store",
     "tendrl-apid": "tendrl/server",
     "tendrl-gluster-integration": "tendrl/integration/gluster",
     "tendrl-ceph-integration": "tendrl/integration/gluster",
