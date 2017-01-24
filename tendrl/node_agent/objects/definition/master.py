@@ -433,6 +433,19 @@ namespace.tendrl.node_agent:
       help: "Platform of the Node"
       value: nodes/$Node_context.node_id/Platform
       list: nodes/$Node_context.node_id/Platform
+    DetectedCluster:
+      attrs:
+        detected_cluster_id:
+          type: String
+        sds_package_name:
+          type: String
+        sds_package_version:
+          type: String
+      enabled: true
+      help: "Cluster detail of the Node"
+      value: nodes/$Node_context.node_id/DetectedCluster
+      list: nodes/$Node_context.node_id/DetectedCluster
+
 namespace.tendrl.node_agent.gluster_integration:
   flows:
     ImportCluster:
