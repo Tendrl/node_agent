@@ -2,14 +2,14 @@ from tendrl.commons.config import load_config
 from tendrl.commons.utils import service_status
 
 TENDRL_SERVICE_TAGS = {
-    "tendrl-node-agent": "TENDRL",
-    "etcd": "TENDRL_SERVER",
-    "tendrl-apid": "TENDRL_SERVER",
-    "tendrl-gluster-integration": "TENDRL_GLUSTER",
-    "tendrl-ceph-integration": "TENDRL_CEPH",
-    "glusterd": "GLUSTER",
-    "ceph-mon": "CEPH_MON",
-    "ceph-osd": "CEPH_OSD"
+    "tendrl-node-agent": "tendrl/node",
+    "etcd": "tendrl/central-store",
+    "tendrl-apid": "tendrl/server",
+    "tendrl-gluster-integration": "tendrl/integration/gluster",
+    "tendrl-ceph-integration": "tendrl/integration/gluster",
+    "glusterd": "gluster/server",
+    "ceph-mon": "ceph/mon",
+    "ceph-osd": "ceph/osd"
 }
 
 TENDRL_SERVICES = [
