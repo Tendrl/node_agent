@@ -26,6 +26,10 @@ from tendrl.node_agent.objects.os import Os
 from tendrl.node_agent.objects.package import Package
 from tendrl.node_agent.objects.platform import Platform
 
+from tendrl.node_agent.flows.import_cluster import ImportCluster
+from tendrl.node_agent.gluster_integration.flows.import_gluster_cluster import ImportGlusterCluster
+from tendrl.node_agent.ceph_integration.flows.import_ceph_cluster import ImportCephCluster
+
 
 class NodeAgentNS(CommonNS):
     def __init__(self):

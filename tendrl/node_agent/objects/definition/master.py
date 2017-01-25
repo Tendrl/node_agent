@@ -19,6 +19,25 @@ namespace.tendrl.node_agent:
         ceph: namespace.tendrl.ceph_integration
         gluster: namespace.tendrl.gluster_integration
 
+  flows:
+    ImportCluster:
+      atoms:
+        - tendrl.node_agent.objects.detected_cluster.atoms.import.Import
+      help: "Import existing Gluster Cluster"
+      enabled: true
+      inputs:
+        mandatory:
+          - cluster_id
+          - cluster_type
+          - cluster_detection_id
+          - cluster_name
+          - "cluster_nodes[]"
+        optional:
+          - cluster_version
+      run: tendrl.node_agent.flows.import_cluster.ImportCluster
+      type: Create
+      uuid: 2f94a48a-05d7-408c-b400-e27827f4edfe
+      version: 1
   objects:
     Definition:
         enabled: True
@@ -53,6 +72,13 @@ namespace.tendrl.node_agent:
           help: Storage system package version
           type: String
       value: nodes/$Node_context.node_id/DetectedCluster
+      atoms:
+        Import:
+          enabled: true
+          name: "Import existing cluster"
+          help: "Imports existing cluster"
+          run: tendrl.node_agent.objects.detected_cluster.atoms.import.Import
+          uuid: b90a0d97-8c9f-4ab1-8f64-dbb5638159a5
     Cpu:
       attrs:
         architecture:
@@ -263,7 +289,7 @@ namespace.tendrl.node_agent:
       list: nodes/$Node_context.node_id/Disks/free
     Node:
       atoms:
-        cmd:
+        Cmd:
           enabled: true
           inputs:
             mandatory:
@@ -273,7 +299,7 @@ namespace.tendrl.node_agent:
           run: tendrl.node_agent.atoms.node.cmd.Cmd
           type: Create
           uuid: dc8fff3a-34d9-4786-9282-55eff6abb6c3
-        check_node_up:
+        CheckNodeUp:
           enabled: true
           inputs:
             mandatory:
@@ -308,7 +334,7 @@ namespace.tendrl.node_agent:
       help: "OS"
     Package:
       atoms:
-        install:
+        Install:
           enabled: true
           inputs:
             mandatory:
@@ -401,7 +427,7 @@ namespace.tendrl.node_agent:
       help: Node Context
     File:
       atoms:
-        write:
+        Write:
           enabled: true
           inputs:
             mandatory:
@@ -437,10 +463,10 @@ namespace.tendrl.node_agent.gluster_integration:
   flows:
     ImportCluster:
       atoms:
-        - tendrl.node_agent.objects.Package.atoms.install
-        - tendrl.node_agent.gluster_integration.objects.Config.atoms.generate
-        - tendrl.node_agent.objects.File.atoms.write
-        - tendrl.node_agent.objects.Node.atoms.cmd
+        - tendrl.node_agent.objects.Package.atoms.install.Install
+        - tendrl.node_agent.gluster_integration.objects.Config.atoms.generate.Generate
+        - tendrl.node_agent.objects.File.atoms.write.Write
+        - tendrl.node_agent.objects.Node.atoms.cmd.Cmd
       help: "Import existing Gluster Cluster"
       enabled: true
       inputs:
@@ -450,10 +476,10 @@ namespace.tendrl.node_agent.gluster_integration:
           - Tendrl_context.sds_version
           - Tendrl_context.cluster_id
       post_run:
-        - tendrl.node_agent.gluster_integration.objects.Tendrl_context.atoms.check_cluster_id_exists
+        - tendrl.node_agent.gluster_integration.objects.Tendrl_context.atoms.check_cluster_id_exists.CheckClusterIdExists
       pre_run:
-        - tendrl.node_agent.objects.Node.atoms.check_node_up
-        - tendrl.node_agent.objects.Tendrl_context.atoms.compare
+        - tendrl.node_agent.objects.Node.atoms.check_node_up.CheckNodeUp
+        - tendrl.node_agent.objects.Tendrl_context.atoms.compare.Compare
       run: tendrl.node_agent.gluster_integration.flows.import_cluster.ImportCluster
       type: Create
       uuid: 2f94a48a-05d7-408c-b400-e27827f4edef
@@ -481,7 +507,7 @@ namespace.tendrl.node_agent.gluster_integration:
       value: clusters/$Tendrl_context.cluster_id/Tendrl_context
     Config:
       atoms:
-        generate:
+        Generate:
           enabled: true
           inputs:
             mandatory:
@@ -514,10 +540,10 @@ namespace.tendrl.node_agent.ceph_integration:
   flows:
     ImportCluster:
       atoms:
-        - tendrl.node_agent.objects.Package.atoms.install
-        - tendrl.node_agent.ceph_integration.objects.Config.atoms.generate
-        - tendrl.node_agent.objects.File.atoms.write
-        - tendrl.node_agent.objects.Node.atoms.cmd
+        - tendrl.node_agent.objects.Package.atoms.install.Install
+        - tendrl.node_agent.ceph_integration.objects.Config.atoms.generate.Generate
+        - tendrl.node_agent.objects.File.atoms.write.Write
+        - tendrl.node_agent.objects.Node.atoms.cmd.Cmd
       help: "Import existing Ceph Cluster"
       enabled: true
       inputs:
@@ -527,10 +553,10 @@ namespace.tendrl.node_agent.ceph_integration:
           - Tendrl_context.sds_version
           - Tendrl_context.cluster_id
       post_run:
-        - tendrl.node_agent.ceph_integration.objects.Tendrl_context.atoms.check_cluster_id_exists
+        - tendrl.node_agent.ceph_integration.objects.Tendrl_context.atoms.check_cluster_id_exists.CheckClusterIdExists
       pre_run:
-        - tendrl.node_agent.objects.Node.atoms.check_node_up
-        - tendrl.node_agent.objects.Tendrl_context.atoms.compare
+        - tendrl.node_agent.objects.Node.atoms.check_node_up.CheckNodeUp
+        - tendrl.node_agent.objects.Tendrl_context.atoms.compare.Compare
       run: tendrl.node_agent.ceph_integration.flows.import_cluster.ImportCluster
       type: Create
       uuid: 5a48d43b-a163-496c-b01d-9c600ea0a5db
@@ -538,7 +564,7 @@ namespace.tendrl.node_agent.ceph_integration:
   objects:
     Tendrl_context:
       atoms:
-        check_cluster_id_exists:
+        CheckClusterIdExists:
           enabled: true
           name: "Check cluster id existence"
           help: "Checks if a cluster id exists"
@@ -558,7 +584,7 @@ namespace.tendrl.node_agent.ceph_integration:
       value: clusters/$Tendrl_context.cluster_id/Tendrl_context
     Config:
       atoms:
-        generate:
+        Generate:
           enabled: true
           inputs:
             mandatory:
