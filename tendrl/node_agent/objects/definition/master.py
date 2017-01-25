@@ -433,9 +433,8 @@ namespace.tendrl.node_agent:
       help: "Platform of the Node"
       value: nodes/$Node_context.node_id/Platform
       list: nodes/$Node_context.node_id/Platform
-namespace.tendrl.node_agent.gluster_integration:
   flows:
-    ImportCluster:
+    ImportGlusterCluster:
       atoms:
         - tendrl.node_agent.objects.Package.atoms.install
         - tendrl.node_agent.gluster_integration.objects.Config.atoms.generate
@@ -454,10 +453,12 @@ namespace.tendrl.node_agent.gluster_integration:
       pre_run:
         - tendrl.node_agent.objects.Node.atoms.check_node_up
         - tendrl.node_agent.objects.Tendrl_context.atoms.compare
-      run: tendrl.node_agent.gluster_integration.flows.import_cluster.ImportCluster
+      run: tendrl.node_agent.flows.import_gluster_cluster.ImportGlusterCluster
       type: Create
       uuid: 2f94a48a-05d7-408c-b400-e27827f4edef
       version: 1
+
+namespace.tendrl.node_agent.gluster_integration:
   objects:
     Tendrl_context:
       atoms:
