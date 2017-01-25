@@ -12,7 +12,7 @@ class NodeAgentBaseObject(objects.BaseObject):
             atoms=None,
             flows=None
     ):
-        super(NodeAgentBaseObject, self).__init__(name=None,
+        super(NodeAgentBaseObject, self).__init__(
             attrs=None,
             enabled=None,
             obj_list=None,
@@ -51,7 +51,8 @@ class NodeAgentBaseObject(objects.BaseObject):
 
 
 class NodeAgentBaseAtom(atoms.BaseAtom):
+    obj = NodeAgentBaseObject
     def __init__(
             self, *args, **kwargs):
-        
+
         super(NodeAgentBaseAtom, self).__init__(*args, **kwargs)

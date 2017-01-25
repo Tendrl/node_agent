@@ -21,43 +21,43 @@ namespace.tendrl.node_agent:
 
   objects:
     Definition:
-      atoms:
-        generate:
-          enabled: true
-          inputs:
-            mandatory:
-              - Config.etcd_port
-              - Config.etcd_connection
-          name: "Generate Ceph Integration configuration based on provided inputs"
-          help: "Generates configuration content"
-          outputs:
-            - Config.data
-            - Config.file_path
-          run: tendrl.node_agent.ceph_integration.objects.Config.atoms.generate.Generate
-          uuid: 61959242-628f-4847-a5e2-2c8d8daac0cd
+        enabled: True
+        help: "Definition"
+        value: _tendrl/definitions/master
+        list: _tendrl/definitions/master
+        attrs:
+            master:
+                help: master definitions
+                type: String
+    Config:
+        enabled: True
+        help: "Config"
+        value: _tendrl/config/node-agent/data
+        list: _tendrl/config/node-agent
+        attrs:
+            data:
+                help: config
+                type: String
+    DetectedCluster:
+      enabled: True
+      help: "DetectedCluster"
+      list: nodes/$Node_context.node_id/DetectedCluster
       attrs:
-        data:
-          help: "Configuration data of Ceph Integration for this Tendrl deployment"
+        detected_cluster_id:
+          help: "Temporary id for the sds which is detected in Tendrl"
           type: String
-        etcd_connection:
-          help: "Host/IP of the etcd central store for this Tendrl deployment"
+        sds_pkg_name:
+          help: Storage system package name
           type: String
-        etcd_port:
-          help: "Port of the etcd central store for this Tendrl deployment"
+        sds_pkg_version:
+          help: Storage system package version
           type: String
-        file_path:
-          default: /etc/tendrl/ceph_integration.conf
-          help: "Path to the Ceph integration tendrl configuration"
-          type: String
-      enabled: true
-
+      value: nodes/$Node_context.node_id/DetectedCluster
     Cpu:
       attrs:
         architecture:
           type: String
         cores_per_socket:
-          type: String
-        cpu_count:
           type: String
         cpu_family:
           type: String
@@ -71,6 +71,7 @@ namespace.tendrl.node_agent:
           type: String
       enabled: true
       value: nodes/$Node_context.node_id/Cpu
+      help: "CPU"
     Memory:
       attrs:
         total_size:
@@ -79,6 +80,7 @@ namespace.tendrl.node_agent:
           type: String
       enabled: true
       value: nodes/$Node_context.node_id/Memory
+      help: "Node Memory"
     Service:
       attrs:
         running:
@@ -89,6 +91,8 @@ namespace.tendrl.node_agent:
           type: String
       enabled: true
       list: nodes/$Node_context.node_id/Services
+      help: "Service"
+      value: nodes/$Node_context.node_id/Services
     Disk:
       attrs:
         disk_id:
@@ -241,6 +245,8 @@ namespace.tendrl.node_agent:
 
       enabled: true
       list: nodes/$Node_context.node_id/Disks
+      value: nodes/$Node_context.node_id/Disks
+      help: "Disk"
     UsedDisk:
       attrs:
         disk_id:
@@ -280,26 +286,26 @@ namespace.tendrl.node_agent:
           type: Create
           uuid: eda0b13a-7362-48d5-b5ca-4b6d6533a5ab
       attrs:
-        cmd_str:
-          type: String
         fqdn:
           type: String
         status:
           type: Boolean
       enabled: true
       value: nodes/$Node_context.node_id/Node
-    OS:
+      help: "Node"
+    Os:
       attrs:
         kernel_version:
           type: String
         os:
           type: String
-        os_varsion:
+        os_version:
           type: String
         selinux_mode:
           type: String
       enabled: true
       value: nodes/$Node_context.node_id/Os
+      help: "OS"
     Package:
       atoms:
         install:
@@ -329,6 +335,8 @@ namespace.tendrl.node_agent:
           help: "Version of the rpm/deb/pypi package"
           type: String
       enabled: true
+      help: "package"
+      value: ""
     Process:
       atoms:
         start:
@@ -352,50 +360,10 @@ namespace.tendrl.node_agent:
           help: "Service state can be started|stopped|restarted|reloaded"
           type: String
       enabled: true
-    Service:
-      atoms:
-        configure:
-          enabled: true
-          inputs:
-            mandatory:
-              - Service.config_path
-              - Service.config_data
-          name: "Configure Service"
-          help: "Checks if a service is running"
-          post_run:
-            - tendrl.node_agent.atoms.service.validations.check_service_running
-          run: tendrl.node_agent.atoms.service.configure.Configure
-          type: Update
-          uuid: b90a0d97-8c9f-4ab1-8f64-dbb5638159a3
-      attrs:
-        config_data:
-          help: "Configuration data for the service"
-          type: String
-        config_path:
-          help: "configuration file path for the service eg:/etc/tendrl/tendrl.conf"
-          type: String
-        name:
-          help: "Name of the service"
-          type: String
-        state:
-          help: "Service state can be started|stopped|restarted|reloaded"
-          type: String
-      enabled: true
-    Tendrl_context:
-      atoms:
-        compare:
-          enabled: true
-          inputs:
-            mandatory:
-              - Tendrl_context.sds_name
-              - Tendrl_context.sds_version
-          name: "Compare SDS details"
-          help: "Compares the SDS details in context"
-          run: tendrl.node_agent.objects.tendrl_context.atoms.compare.Compare
-          uuid: b90a0d97-8c9f-4ab1-8f64-dbb5638159a9
+    TendrlContext:
       enabled: True
       attrs:
-        cluster_id:
+        integration_id:
           help: "Tendrl managed/generated cluster id for the sds being managed by Tendrl"
           type: String
         sds_name:
@@ -407,8 +375,9 @@ namespace.tendrl.node_agent:
         node_id:
           help: "Tendrl ID for the managed node"
           type: String
-      value: nodes/$Node_context.node_id/Tendrl_context
-    Node_context:
+      value: nodes/$Node_context.node_id/TendrlContext
+      help: "Tendrl context"
+    NodeContext:
       attrs:
         machine_id:
           help: "Unique /etc/machine-id"
@@ -422,23 +391,14 @@ namespace.tendrl.node_agent:
         tags:
           help: "The tags associated with this node"
           type: String
-        cluster_id:
-          help: Id of the cluster to which node belongs to
+        status:
+          help: "Node status"
           type: String
-        sds_pkg_name:
-          help: Storage system package name
-          type: String
-        sds_pkg_version:
-          help: Storage system package version
-          type: String
-        detected_cluster_id:
-          help: Detected cluster id
-          type: String
-        cluster_attrs:
-          help: Additional cluster specific attributes
-          type: json
+
       enabled: true
+      list: nodes/$Node_context.node_id/Node_context
       value: nodes/$Node_context.node_id/Node_context
+      help: Node Context
     File:
       atoms:
         write:
@@ -459,6 +419,8 @@ namespace.tendrl.node_agent:
           help: "configuration file path"
           type: String
       enabled: true
+      help: "File"
+      value: ""
     Platform:
       attrs:
         kernel_version:
@@ -468,7 +430,9 @@ namespace.tendrl.node_agent:
         os_version:
           type: String
       enabled: true
+      help: "Platform of the Node"
       value: nodes/$Node_context.node_id/Platform
+      list: nodes/$Node_context.node_id/Platform
 namespace.tendrl.node_agent.gluster_integration:
   flows:
     ImportCluster:
