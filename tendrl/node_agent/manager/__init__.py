@@ -2,6 +2,7 @@ import logging
 
 import etcd
 import gevent
+import signal
 from tendrl.commons import manager as commons_manager
 
 from tendrl.node_agent import node_sync
@@ -40,11 +41,12 @@ class NodeAgentManager(commons_manager.Manager):
             if len(platform_details.keys()) > 0:
                 # update etcd
                 try:
-                    tendrl_ns.node_agent.objects.Platform(
+                    tendrl_ns.platform = tendrl_ns.node_agent.objects.Platform(
                         os=platform_details["Name"],
                         os_version=platform_details["OSVersion"],
                         kernel_version=platform_details["KernelVersion"],
-                        ).save()
+                        )
+                    tendrl_ns.platform.save()
 
                 except etcd.EtcdException as ex:
                     LOG.error(
@@ -72,13 +74,11 @@ class NodeAgentManager(commons_manager.Manager):
 
 
 def main():
-    tendrl_ns.register_subclasses_to_ns()
-    tendrl_ns.setup_initial_objects()
-
     tendrl_ns.central_store_thread = central_store.NodeAgentEtcdCentralStore()
     tendrl_ns.state_sync_thread = node_sync.NodeAgentSyncThread()
 
     tendrl_ns.node_context.save()
+    tendrl_ns.tendrl_context.save()
     tendrl_ns.definitions.save()
     tendrl_ns.config.save()
 
@@ -90,9 +90,10 @@ def main():
     def shutdown():
         LOG.info("Signal handler: stopping")
         complete.set()
+        m.stop()
 
-    gevent.signal(gevent.signal.SIGTERM, shutdown)
-    gevent.signal(gevent.signal.SIGINT, shutdown)
+    gevent.signal(signal.SIGTERM, shutdown)
+    gevent.signal(signal.SIGINT, shutdown)
 
     while not complete.is_set():
         complete.wait(timeout=1)
