@@ -22,6 +22,7 @@ from tendrl.node_agent.objects.node import Node
 from tendrl.node_agent.objects.os import Os
 from tendrl.node_agent.objects.package import Package
 from tendrl.node_agent.objects.platform import Platform
+from tendrl.node_agent.objects.detected_cluster import DetectedCluster
 
 from tendrl.node_agent.flows.import_cluster import ImportCluster
 
