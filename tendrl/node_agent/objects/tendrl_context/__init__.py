@@ -1,11 +1,6 @@
-import logging
-
 from tendrl.commons.etcdobj import EtcdObj
 
 from tendrl.node_agent import objects
-
-
-LOG = logging.getLogger(__name__)
 
 
 class TendrlContext(objects.NodeAgentBaseObject):

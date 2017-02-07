@@ -1,13 +1,12 @@
-import logging
-
 import etcd
 import gevent
+
+from tendrl.commons.event import Event
+from tendrl.commons.message import Message
 
 from tendrl.commons import sds_sync
 
 from tendrl.node_agent.node_sync import disk_sync
-
-LOG = logging.getLogger(__name__)
 
 # TODO(darshan) this has to be moved to Definition file
 
@@ -36,7 +35,10 @@ TENDRL_SERVICE_TAGS = {
 
 class NodeAgentSyncThread(sds_sync.StateSyncThread):
     def _run(self):
-        LOG.info("%s running" % self.__class__.__name__)
+        message = Message(Message.priorities.INFO,
+                          Message.publishers.COMMONS,
+                          {"message": "%s running" % self.__class__.__name__})
+        Event(message)
 
         while not self._complete.is_set():
             try:
@@ -44,11 +46,16 @@ class NodeAgentSyncThread(sds_sync.StateSyncThread):
                 if tendrl_ns.first_node_inventory_sync:
                     interval = 2
                     tendrl_ns.first_node_inventory_sync = False
-                    
+
                 gevent.sleep(interval)
                 tags = []
                 # update node agent service details
-                LOG.info("node_sync, Updating Service data")
+                message = Message(Message.priorities.INFO,
+                                  Message.publishers.COMMONS,
+                                  {"message": "node_sync, Updating Service "
+                                              "data"
+                                   })
+                Event(message)
                 for service in TENDRL_SERVICES:
                     s = tendrl_ns.node_agent.objects.Service(service=service)
                     if s.running:
@@ -57,30 +64,52 @@ class NodeAgentSyncThread(sds_sync.StateSyncThread):
                 gevent.sleep(interval)
 
                 # updating node context with latest tags
-                LOG.info("node_sync, updating node context data with tags")
+                message = Message(Message.priorities.INFO,
+                                  Message.publishers.COMMONS,
+                                  {"message": "node_sync, updating node "
+                                              "context data with tags"
+                                   })
+                Event(message)
                 tags = "\n".join(tags)
                 tendrl_ns.node_agent.objects.NodeContext(tags=tags).save()
                 gevent.sleep(interval)
 
-                LOG.info("node_sync, Updating OS data")
+                message = Message(Message.priorities.INFO,
+                                  Message.publishers.COMMONS,
+                                  {"message": "node_sync, Updating OS data"})
+                Event(message)
                 tendrl_ns.node_agent.objects.Os().save()
                 gevent.sleep(interval)
 
-                LOG.info("node_sync, Updating cpu")
+                message = Message(Message.priorities.INFO,
+                                  Message.publishers.COMMONS,
+                                  {"message": "node_sync, Updating cpu"})
+                Event(message)
                 tendrl_ns.node_agent.objects.Cpu().save()
                 gevent.sleep(interval)
 
-                LOG.info("node_sync, Updating memory")
+                message = Message(Message.priorities.INFO,
+                                  Message.publishers.COMMONS,
+                                  {"message": "node_sync, Updating memory"})
+                Event(message)
                 tendrl_ns.node_agent.objects.Memory().save()
                 gevent.sleep(interval)
 
-                LOG.info("node_sync, Updating disks")
+                message = Message(Message.priorities.INFO,
+                                  Message.publishers.COMMONS,
+                                  {"message": "node_sync, Updating disks"})
+                Event(message)
                 try:
                     tendrl_ns.etcd_orm.client.delete(
                         ("nodes/%s/Disks") % tendrl_ns.node_context.node_id,
                         recursive=True)
                 except etcd.EtcdKeyNotFound as ex:
-                    LOG.debug("Given key is not present in etcd . %s", ex)
+                    message = Message(Message.priorities.DEBUG,
+                                      Message.publishers.COMMONS,
+                                      {"message": "Given key is not present"
+                                                  " in etcd . %s", ex
+                                       })
+                    Event(message)
                 disks = disk_sync.get_node_disks()
                 if "disks" in disks:
                     for disk in disks['disks']:
@@ -97,6 +126,12 @@ class NodeAgentSyncThread(sds_sync.StateSyncThread):
                                 tendrl_ns.node_context.node_id, disk), "")
 
             except Exception as ex:
-                LOG.error(ex)
+                message = Message(Message.priorities.ERROR,
+                                  Message.publishers.COMMONS,
+                                  {"message": ex})
+                Event(message)
 
-        LOG.info("%s complete" % self.__class__.__name__)
+        message = Message(Message.priorities.INFO,
+                          Message.publishers.COMMONS,
+                          {"message": "%s complete" % self.__class__.__name__})
+        Event(message)
