@@ -1,13 +1,13 @@
 import json
-import logging
 import os.path
 import subprocess
+
+from tendrl.commons.event import Event
+from tendrl.commons.message import Message
 
 from tendrl.node_agent.discovery.sds.discover_sds_plugin \
     import DiscoverSDSPlugin
 from tendrl.node_agent import ini2json
-
-LOG = logging.getLogger(__name__)
 
 
 class DiscoverCephStorageSystem(DiscoverSDSPlugin):
@@ -23,7 +23,10 @@ class DiscoverCephStorageSystem(DiscoverSDSPlugin):
         )
         out, err = cmd.communicate()
         if err and 'command not found' in err:
-            LOG.info("ceph not installed on host")
+            message = Message(Message.priorities.INFO,
+                              Message.publishers.COMMONS,
+                              {"message": "ceph not installed on host"})
+            Event(message)
             return ret_val
 
         if out:
@@ -37,11 +40,16 @@ class DiscoverCephStorageSystem(DiscoverSDSPlugin):
             cfg_file = ""
             if os_name in ['CentOS Linux', 'Red Hat Enterprise Linux Server']:
                 cfg_file = '/etc/sysconfig/ceph'
-            #TODO(shtripat) handle the case of ubuntu
+            # TODO(shtripat) handle the case of ubuntu
 
             if cfg_file != "":
                 if not os.path.exists(cfg_file):
-                    LOG.info("config file: %s not found" % cfg_file)
+                    message = Message(Message.priorities.INFO,
+                                      Message.publishers.COMMONS,
+                                      {"message": "config file: %s not found" %
+                                                  cfg_file
+                                       })
+                    Event(message)
                     return ret_val
                 with open(cfg_file) as f:
                     for line in f:
@@ -53,7 +61,7 @@ class DiscoverCephStorageSystem(DiscoverSDSPlugin):
                     "/etc/ceph/%s.conf" % cluster_name
                 )
                 if "global" in raw_data:
-                    ret_val['detected_cluster_id'] = raw_data['global']\
+                    ret_val['detected_cluster_id'] = raw_data['global'] \
                         ['fsid']
                     ret_val['cluster_attrs'] = {
                         'fsid': raw_data['global']['fsid'],
