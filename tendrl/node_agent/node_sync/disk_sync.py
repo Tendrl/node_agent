@@ -1,8 +1,7 @@
-import logging
+from tendrl.commons.event import Event
+from tendrl.commons.message import Message
 
 from tendrl.commons.utils import cmd_utils
-
-LOG = logging.getLogger(__name__)
 
 
 def get_node_disks():
@@ -79,9 +78,21 @@ def get_node_disks():
                         else:
                             rv['used_disks_id'].append(disk['disk_id'])
         else:
-            LOG.error(err)
+            Event(
+                Message(
+                    Message.priorities.ERROR,
+                    Message.publishers.NODE_AGENT,
+                    {"message": err}
+                )
+            )
     else:
-        LOG.error(err)
+        Event(
+            Message(
+                Message.priorities.ERROR,
+                Message.publishers.NODE_AGENT,
+                {"message": err}
+            )
+        )
     return rv
 
 

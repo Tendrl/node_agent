@@ -1,13 +1,14 @@
 import importlib
 import inspect
-import logging
 import os
 import sys
+import traceback
+
+from tendrl.commons.event import Event
+from tendrl.commons.message import Message
 
 from tendrl.node_agent.discovery.sds.discover_sds_plugin \
     import DiscoverSDSPlugin
-
-LOG = logging.getLogger(__name__)
 
 
 class SDSDiscoveryManager(object):
@@ -37,10 +38,17 @@ class SDSDiscoveryManager(object):
                 mod = importlib.import_module(plugin_name)
                 clsmembers = inspect.getmembers(mod, inspect.isclass)
                 for name, cls in clsmembers:
-                    exec("from %s import %s" % (plugin_name, name))
+                    exec ("from %s import %s" % (plugin_name, name))
         except (SyntaxError, ValueError, ImportError) as ex:
-            LOG.error("Failed to load SDS detection plugins. Error %s" %
-                      ex, exc_info=True)
+            Event(
+                Message(
+                    Message.priorities.ERROR,
+                    Message.publishers.NODE_AGENT,
+                    {"message": "Failed to load SDS detection plugins. "
+                                "Error %s" % ex + traceback.format_exc()
+                     }
+                )
+            )
             raise ex
 
     def get_available_plugins(self):
