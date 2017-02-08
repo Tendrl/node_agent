@@ -58,7 +58,7 @@ enviroment which we have created during installation of *commons*.
 
 4. Create config file::
 
-    $ cp etc/logging.yaml.timedrotation.sample /etc/tendrl/node-agent_logging.yaml
+    $ cp etc/tendrl/node-agent/logging.yaml.syslog.sample /etc/tendrl/node-agent_logging.yaml
     $ cp etc/tendrl/node-agent/node-agent-dev.conf.yaml /etc/tendrl/node-agent/node-agent.conf.yaml
 
 5. Add suitable configuration in config file by updating following lines to
@@ -75,4 +75,5 @@ enviroment which we have created during installation of *commons*.
 7. Run::
 
     $ tendrl-node-agent
+
 
