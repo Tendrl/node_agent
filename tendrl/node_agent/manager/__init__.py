@@ -9,6 +9,7 @@ from tendrl.node_agent import node_sync
 from tendrl.node_agent import central_store
 from tendrl.node_agent.discovery.platform.manager import PlatformManager
 from tendrl.node_agent.discovery.sds.manager import SDSDiscoveryManager
+from tendrl.node_agent.message.handler import MessageHandler
 
 LOG = logging.getLogger(__name__)
 
@@ -19,7 +20,8 @@ class NodeAgentManager(commons_manager.Manager):
         # node details and pushes the same to etcd
         super(NodeAgentManager, self).__init__(
             tendrl_ns.state_sync_thread,
-            tendrl_ns.central_store_thread
+            tendrl_ns.central_store_thread,
+            tendrl_ns.message_handler_thread
         )
 
         self.load_and_execute_platform_discovery_plugins()
@@ -78,6 +80,7 @@ class NodeAgentManager(commons_manager.Manager):
 
 
 def main():
+    tendrl_ns.message_handler_thread = MessageHandler()
     tendrl_ns.central_store_thread = central_store.NodeAgentEtcdCentralStore()
     tendrl_ns.first_node_inventory_sync = True
     tendrl_ns.state_sync_thread = node_sync.NodeAgentSyncThread()

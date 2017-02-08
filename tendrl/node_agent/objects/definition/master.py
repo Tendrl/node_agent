@@ -285,6 +285,87 @@ namespace.tendrl.node_agent:
           type: String
       enabled: true
       list: nodes/$Node_context.node_id/Disks/free
+    Message:
+      attrs:
+        message_id:
+          help: "Message UUID"
+          type: String
+        timestamp:
+          help: "time"
+          type: Time
+        priority:
+          help: "Message priority"
+          type: String
+        publisher:
+          help: "Message publisher"
+          type: String
+        node_id:
+          help: "node id"
+          type: String
+        payload:
+          help: "Differ based on message"
+          type: Dict
+        caller:
+          help: "Called details"
+          type: Dict
+      enabled: true
+      list: /Messages
+      help: "Messages"
+      value: /Messages
+    NodeMessage:
+      attrs:
+        message_id:
+          help: "Message UUID"
+          type: String
+        timestamp:
+          help: "time"
+          type: Time
+        priority:
+          help: "Message priority"
+          type: String
+        publisher:
+          help: "Message publisher"
+          type: String
+        node_id:
+          help: "node id"
+          type: String
+        payload:
+          help: "Differ based on message"
+          type: Dict
+        caller:
+          help: "Called details"
+          type: Dict
+      enabled: true
+      list: node/$Node_context.node_id/Messages
+      help: "Node Messages"
+      value: node/$Node_context.node_id/Messages
+    ClusterMessage:
+      attrs:
+        message_id:
+          help: "Message UUID"
+          type: String
+        timestamp:
+          help: "time"
+          type: Time
+        priority:
+          help: "Message priority"
+          type: String
+        publisher:
+          help: "Message publisher"
+          type: String
+        node_id:
+          help: "node id"
+          type: String
+        payload:
+          help: "Differ based on message"
+          type: Dict
+        caller:
+          help: "Called details"
+          type: Dict
+      enabled: true
+      list: clusters/$TendrlContext.integration_id/Messages
+      help: "Cluster Messages"
+      value: clusters/$TendrlContext.integration_id/Messages
     Node:
       atoms:
         cmd:
