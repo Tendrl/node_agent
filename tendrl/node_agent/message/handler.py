@@ -6,6 +6,7 @@ from gevent.socket import error as socket_error
 from gevent.socket import timeout as socket_timeout
 from io import BlockingIOError
 import os
+import grp
 import sys
 from tendrl.commons.message import Message
 from tendrl.node_agent.message.logger import Logger
@@ -57,7 +58,13 @@ class MessageHandler(gevent.greenlet.Greenlet):
             self.sock.setblocking(0)
             self.sock.bind(socket_path)
             self.sock.listen(50)
-        except (TypeError, BlockingIOError, socket_error, ValueError) as ex:
+            gid = grp.getgrnam("tendrl").gr_gid
+            os.chown(socket_path, -1, gid)
+            os.chmod(socket_path, 0770)
+        except(TypeError, BlockingIOError, socket_error, ValueError) as ex:
             sys.stderr.write(
                 "Unable to create socket .%s\n" % str(ex))
+        except(KeyError) as ex:
+            sys.stderr.write(
+                "User not found: tendrl-user .err:%s\n" % str(ex))
         return self.sock
