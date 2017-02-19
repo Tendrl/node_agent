@@ -28,11 +28,11 @@ class NodeAgentManager(commons_manager.Manager):
         # platform plugins
         Event(
             Message(
-                Message.priorities.INFO,
-                Message.publishers.NODE_AGENT,
-                {"message": "load_and_execute_platform_discovery_plugins, "
-                            "platform plugins"
-                 }
+                priority="info",
+                publisher=tendrl_ns.publisher_id,
+                payload={"message": "load_and_execute_platform_discovery_"
+                                    "plugins, platform plugins"
+                         }
             )
         )
 
@@ -41,11 +41,11 @@ class NodeAgentManager(commons_manager.Manager):
         except ValueError as ex:
             Event(
                 Message(
-                    Message.priorities.ERROR,
-                    Message.publishers.NODE_AGENT,
-                    {"message": 'Failed to init PlatformManager. \Error %s' %
-                                str(ex)
-                     }
+                    priority="error",
+                    publisher=tendrl_ns.publisher_id,
+                    payload={"message": 'Failed to init PlatformManager. '
+                                        '\Error %s' % str(ex)
+                             }
                 )
             )
             return
@@ -65,11 +65,11 @@ class NodeAgentManager(commons_manager.Manager):
                 except etcd.EtcdException as ex:
                     Event(
                         Message(
-                            Message.priorities.ERROR,
-                            Message.publishers.NODE_AGENT,
-                            {"message": 'Failed to update etcd . \Error %s' %
-                                        str(ex)
-                             }
+                            priority="error",
+                            publisher=tendrl_ns.publisher_id,
+                            payload={"message": 'Failed to update etcd . '
+                                                '\Error %s' % str(ex)
+                                     }
                         )
                     )
                 break
@@ -77,9 +77,9 @@ class NodeAgentManager(commons_manager.Manager):
     def load_and_execute_sds_discovery_plugins(self):
         Event(
             Message(
-                Message.priorities.INFO,
-                Message.publishers.NODE_AGENT,
-                {"message": "load_and_execute_sds_discovery_plugins"}
+                priority="info",
+                publisher=tendrl_ns.publisher_id,
+                payload={"message": "load_and_execute_sds_discovery_plugins"}
             )
         )
         try:
@@ -87,11 +87,11 @@ class NodeAgentManager(commons_manager.Manager):
         except ValueError as ex:
             Event(
                 Message(
-                    Message.priorities.ERROR,
-                    Message.publishers.NODE_AGENT,
-                    {"message": 'Failed to init SDSDiscoveryManager. \Error %s'
-                                % str(ex)
-                     }
+                    priority="error",
+                    publisher=tendrl_ns.publisher_id,
+                    payload={"message": 'Failed to init SDSDiscoveryManager. '
+                                        '\Error %s' % str(ex)
+                             }
                 )
             )
             return
@@ -110,17 +110,18 @@ class NodeAgentManager(commons_manager.Manager):
                 except etcd.EtcdException as ex:
                     Event(
                         Message(
-                            Message.priorities.ERROR,
-                            Message.publishers.NODE_AGENT,
-                            {"message": 'Failed to update etcd . Error %s' %
-                                        str(ex)
-                             }
+                            priority="error",
+                            publisher=tendrl_ns.publisher_id,
+                            payload={"message": 'Failed to update etcd . '
+                                                'Error %s' % str(ex)
+                                     }
                         )
                     )
                 break
 
 
 def main():
+    tendrl_ns.publisher_id = "node-agent"
     tendrl_ns.central_store_thread = central_store.NodeAgentEtcdCentralStore()
     tendrl_ns.first_node_inventory_sync = True
     tendrl_ns.state_sync_thread = node_sync.NodeAgentSyncThread()
@@ -138,9 +139,9 @@ def main():
     def shutdown():
         Event(
             Message(
-                Message.priorities.INFO,
-                Message.publishers.NODE_AGENT,
-                {"message": "Signal handler: stopping"}
+                priority="info",
+                publisher=tendrl_ns.publisher_id,
+                payload={"message": "Signal handler: stopping"}
             )
         )
         complete.set()

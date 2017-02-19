@@ -31,11 +31,12 @@ class PlatformManager(object):
         except (SyntaxError, ValueError, ImportError) as ex:
             Event(
                 Message(
-                    Message.priorities.ERROR,
-                    Message.publishers.NODE_AGENT,
-                    {"message": 'Failed to load the platform plugins. Error %s'
-                                % ex + traceback.format_exc()
-                     }
+                    priority="error",
+                    publisher=tendrl_ns.publisher_id,
+                    payload={"message": 'Failed to load the platform plugins. '
+                                        'Error %s %s' %
+                                        (ex, traceback.format_exc())
+                             }
                 )
             )
             raise ex

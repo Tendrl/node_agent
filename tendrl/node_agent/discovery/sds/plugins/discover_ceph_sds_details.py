@@ -24,9 +24,9 @@ class DiscoverCephStorageSystem(DiscoverSDSPlugin):
         if err and 'command not found' in err:
             Event(
                 Message(
-                    Message.priorities.INFO,
-                    Message.publishers.NODE_AGENT,
-                    {"message": "ceph not installed on host"}
+                    priority="info",
+                    publisher=tendrl_ns.publisher_id,
+                    payload={"message": "ceph not installed on host"}
                 )
             )
             return ret_val
@@ -48,9 +48,11 @@ class DiscoverCephStorageSystem(DiscoverSDSPlugin):
                 if not os.path.exists(cfg_file):
                     Event(
                         Message(
-                            Message.priorities.INFO,
-                            Message.publishers.NODE_AGENT,
-                            {"message": "config file: %s not found" % cfg_file}
+                            priority="info",
+                            publisher=tendrl_ns.publisher_id,
+                            payload={"message": "config file: %s not found" %
+                                                cfg_file
+                                     }
                         )
                     )
                     return ret_val

@@ -22,9 +22,9 @@ class DiscoverGlusterStorageSystem(DiscoverSDSPlugin):
         if err:
             Event(
                 Message(
-                    Message.priorities.ERROR,
-                    Message.publishers.NODE_AGENT,
-                    {"message": "Error formulating cluster_id"}
+                    priority="error",
+                    publisher=tendrl_ns.publisher_id,
+                    payload={"message": "Error formulating cluster_id"}
                 )
             )
             return ""
@@ -58,9 +58,9 @@ class DiscoverGlusterStorageSystem(DiscoverSDSPlugin):
         if err and 'command not found' in err:
             Event(
                 Message(
-                    Message.priorities.INFO,
-                    Message.publishers.NODE_AGENT,
-                    {"message": "gluster not installed on host"}
+                    priority="info",
+                    publisher=tendrl_ns.publisher_id,
+                    payload={"message": "gluster not installed on host"}
                 )
             )
             return ret_val

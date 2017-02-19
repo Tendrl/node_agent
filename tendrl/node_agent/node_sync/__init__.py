@@ -37,9 +37,9 @@ class NodeAgentSyncThread(sds_sync.StateSyncThread):
     def _run(self):
         Event(
             Message(
-                Message.priorities.INFO,
-                Message.publishers.NODE_AGENT,
-                {"message": "%s running" % self.__class__.__name__}
+                priority="info",
+                publisher=tendrl_ns.publisher_id,
+                payload={"message": "%s running" % self.__class__.__name__}
             )
         )
         while not self._complete.is_set():
@@ -54,9 +54,9 @@ class NodeAgentSyncThread(sds_sync.StateSyncThread):
                 # update node agent service details
                 Event(
                     Message(
-                        Message.priorities.INFO,
-                        Message.publishers.NODE_AGENT,
-                        {"message": "node_sync, Updating Service data"}
+                        priority="info",
+                        publisher=tendrl_ns.publisher_id,
+                        payload={"message": "node_sync, Updating Service data"}
                     )
                 )
                 for service in TENDRL_SERVICES:
@@ -69,11 +69,11 @@ class NodeAgentSyncThread(sds_sync.StateSyncThread):
                 # updating node context with latest tags
                 Event(
                     Message(
-                        Message.priorities.INFO,
-                        Message.publishers.NODE_AGENT,
-                        {"message": "node_sync, updating node context data "
-                                    "with tags"
-                         }
+                        priority="info",
+                        publisher=tendrl_ns.publisher_id,
+                        payload={"message": "node_sync, updating node context "
+                                            "data with tags"
+                                 }
                     )
                 )
                 tags = "\n".join(tags)
@@ -82,9 +82,9 @@ class NodeAgentSyncThread(sds_sync.StateSyncThread):
 
                 Event(
                     Message(
-                        Message.priorities.INFO,
-                        Message.publishers.NODE_AGENT,
-                        {"message": "node_sync, Updating OS data"}
+                        priority="info",
+                        publisher=tendrl_ns.publisher_id,
+                        payload={"message": "node_sync, Updating OS data"}
                     )
                 )
                 tendrl_ns.node_agent.objects.Os().save()
@@ -92,9 +92,9 @@ class NodeAgentSyncThread(sds_sync.StateSyncThread):
 
                 Event(
                     Message(
-                        Message.priorities.INFO,
-                        Message.publishers.NODE_AGENT,
-                        {"message": "node_sync, Updating cpu"}
+                        priority="info",
+                        publisher=tendrl_ns.publisher_id,
+                        payload={"message": "node_sync, Updating cpu"}
                     )
                 )
                 tendrl_ns.node_agent.objects.Cpu().save()
@@ -102,9 +102,9 @@ class NodeAgentSyncThread(sds_sync.StateSyncThread):
 
                 Event(
                     Message(
-                        Message.priorities.INFO,
-                        Message.publishers.NODE_AGENT,
-                        {"message": "node_sync, Updating memory"}
+                        priority="info",
+                        publisher=tendrl_ns.publisher_id,
+                        payload={"message": "node_sync, Updating memory"}
                     )
                 )
                 tendrl_ns.node_agent.objects.Memory().save()
@@ -112,9 +112,9 @@ class NodeAgentSyncThread(sds_sync.StateSyncThread):
 
                 Event(
                     Message(
-                        Message.priorities.INFO,
-                        Message.publishers.NODE_AGENT,
-                        {"message": "node_sync, Updating disks"}
+                        priority="info",
+                        publisher=tendrl_ns.publisher_id,
+                        payload={"message": "node_sync, Updating disks"}
                     )
                 )
                 try:
@@ -124,11 +124,11 @@ class NodeAgentSyncThread(sds_sync.StateSyncThread):
                 except etcd.EtcdKeyNotFound as ex:
                     Event(
                         Message(
-                            Message.priorities.DEBUG,
-                            Message.publishers.NODE_AGENT,
-                            {"message": "Given key is not present in etc d . "
-                                        "%s" + ex
-                             }
+                            priority="debug",
+                            publisher=tendrl_ns.publisher_id,
+                            payload={"message": "Given key is not present in "
+                                                "etcd . %s" + ex
+                                     }
                         )
                     )
                 disks = disk_sync.get_node_disks()
@@ -149,15 +149,15 @@ class NodeAgentSyncThread(sds_sync.StateSyncThread):
             except Exception as ex:
                 Event(
                     Message(
-                        Message.priorities.ERROR,
-                        Message.publishers.NODE_AGENT,
-                        {"message": ex}
+                        priority="error",
+                        publisher=tendrl_ns.publisher_id,
+                        payload={"message": ex}
                     )
                 )
         Event(
             Message(
-                Message.priorities.INFO,
-                Message.publishers.NODE_AGENT,
-                {"message": "%s complete" % self.__class__.__name__}
+                priority="info",
+                publisher=tendrl_ns.publisher_id,
+                payload={"message": "%s complete" % self.__class__.__name__}
             )
         )

@@ -37,11 +37,12 @@ class NodeContext(objects.NodeAgentBaseObject):
             f.write(node_id)
             Event(
                 Message(
-                    Message.priorities.INFO,
-                    Message.publishers.NODE_AGENT,
-                    {"message": "SET_LOCAL: tendrl_ns.node_agent.objects."
-                                "NodeContext.node_id==%s" % node_id
-                     }
+                    priority="info",
+                    publisher=tendrl_ns.publisher_id,
+                    payload={"message": "SET_LOCAL: tendrl_ns.node_agent."
+                                        "objects.NodeContext.node_id==%s" %
+                                        node_id
+                             }
                 )
             )
 
@@ -56,12 +57,13 @@ class NodeContext(objects.NodeAgentBaseObject):
                     if node_id:
                         Event(
                             Message(
-                                Message.priorities.INFO,
-                                Message.publishers.NODE_AGENT,
-                                {"message": "GET_LOCAL: tendrl_ns.node_agent."
-                                            "objects.NodeContext.node_id==%s"
-                                            % node_id
-                                 }
+                                priority="info",
+                                publisher=tendrl_ns.publisher_id,
+                                payload={"message": "GET_LOCAL: "
+                                                    "tendrl_ns.node_agent."
+                                                    "objects.NodeContext."
+                                                    "node_id==%s" % node_id
+                                         }
                             )
                         )
                         return node_id

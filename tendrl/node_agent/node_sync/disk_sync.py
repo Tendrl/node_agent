@@ -80,17 +80,17 @@ def get_node_disks():
         else:
             Event(
                 Message(
-                    Message.priorities.ERROR,
-                    Message.publishers.NODE_AGENT,
-                    {"message": err}
+                    priority="error",
+                    publisher=tendrl_ns.publisher_id,
+                    payload={"message": err}
                 )
             )
     else:
         Event(
             Message(
-                Message.priorities.ERROR,
-                Message.publishers.NODE_AGENT,
-                {"message": err}
+                priority="error",
+                publisher=tendrl_ns.publisher_id,
+                payload={"message": err}
             )
         )
     return rv
