@@ -1,13 +1,13 @@
 import collections
 import hashlib
-import logging
 import socket
 import subprocess
 
+from tendrl.commons.event import Event
+from tendrl.commons.message import Message
+
 from tendrl.node_agent.discovery.sds.discover_sds_plugin \
     import DiscoverSDSPlugin
-
-LOG = logging.getLogger(__name__)
 
 
 class DiscoverGlusterStorageSystem(DiscoverSDSPlugin):
@@ -20,7 +20,13 @@ class DiscoverGlusterStorageSystem(DiscoverSDSPlugin):
         )
         out, err = cmd.communicate()
         if err:
-            LOG.error("Error formulating cluster_id")
+            Event(
+                Message(
+                    priority="error",
+                    publisher=tendrl_ns.publisher_id,
+                    payload={"message": "Error formulating cluster_id"}
+                )
+            )
             return ""
         lines = out.split('\n')[1:]
         final_checksum = ""
@@ -50,7 +56,13 @@ class DiscoverGlusterStorageSystem(DiscoverSDSPlugin):
         )
         out, err = cmd.communicate()
         if err and 'command not found' in err:
-            LOG.info("gluster not installed on host")
+            Event(
+                Message(
+                    priority="info",
+                    publisher=tendrl_ns.publisher_id,
+                    payload={"message": "gluster not installed on host"}
+                )
+            )
             return ret_val
         lines = out.split('\n')
         ret_val['pkg_version'] = lines[0].split()[1]
