@@ -1,16 +1,16 @@
-import logging
-
 import etcd
 import gevent
 import signal
+
+from tendrl.commons.event import Event
 from tendrl.commons import manager as commons_manager
+from tendrl.commons.message import Message
 
 from tendrl.node_agent import central_store
 from tendrl.node_agent.discovery.platform.manager import PlatformManager
 from tendrl.node_agent.discovery.sds.manager import SDSDiscoveryManager
 from tendrl.node_agent.message.handler import MessageHandler
 from tendrl.node_agent import node_sync
-LOG = logging.getLogger(__name__)
 
 
 class NodeAgentManager(commons_manager.Manager):
@@ -28,13 +28,27 @@ class NodeAgentManager(commons_manager.Manager):
 
     def load_and_execute_platform_discovery_plugins(self):
         # platform plugins
-        LOG.info("load_and_execute_platform_discovery_plugins, platform \
-         plugins")
+        Event(
+            Message(
+                priority="info",
+                publisher=tendrl_ns.publisher_id,
+                payload={"message": "load_and_execute_platform_discovery_"
+                                    "plugins, platform plugins"
+                         }
+            )
+        )
         try:
             pMgr = PlatformManager()
         except ValueError as ex:
-            LOG.error(
-                'Failed to init PlatformManager. \Error %s' % str(ex))
+            Event(
+                Message(
+                    priority="error",
+                    publisher=tendrl_ns.publisher_id,
+                    payload={"message": 'Failed to init PlatformManager. '
+                                        '\Error %s' % str(ex)
+                             }
+                )
+            )
             return
         # execute the platform plugins
         for plugin in pMgr.get_available_plugins():
@@ -50,17 +64,37 @@ class NodeAgentManager(commons_manager.Manager):
                     tendrl_ns.platform.save()
 
                 except etcd.EtcdException as ex:
-                    LOG.error(
-                        'Failed to update etcd . \Error %s' % str(ex))
+                    Event(
+                        Message(
+                            priority="error",
+                            publisher=tendrl_ns.publisher_id,
+                            payload={"message": 'Failed to update etcd . '
+                                                '\Error %s' % str(ex)
+                                     }
+                        )
+                    )
                 break
 
     def load_and_execute_sds_discovery_plugins(self):
-        LOG.info("load_and_execute_sds_discovery_plugins")
+        Event(
+            Message(
+                priority="info",
+                publisher=tendrl_ns.publisher_id,
+                payload={"message": "load_and_execute_sds_discovery_plugins"}
+            )
+        )
         try:
             sds_discovery_manager = SDSDiscoveryManager()
         except ValueError as ex:
-            LOG.error(
-                'Failed to init SDSDiscoveryManager. \Error %s' % str(ex))
+            Event(
+                Message(
+                    priority="error",
+                    publisher=tendrl_ns.publisher_id,
+                    payload={"message": 'Failed to init SDSDiscoveryManager. '
+                                        '\Error %s' % str(ex)
+                             }
+                )
+            )
             return
 
         # Execute the SDS discovery plugins and tag the nodes with data
@@ -75,11 +109,20 @@ class NodeAgentManager(commons_manager.Manager):
                         sds_pkg_version=sds_details.get('pkg_version'),
                     ).save()
                 except etcd.EtcdException as ex:
-                    LOG.error('Failed to update etcd . Error %s' % str(ex))
+                    Event(
+                        Message(
+                            priority="error",
+                            publisher=tendrl_ns.publisher_id,
+                            payload={"message": 'Failed to update etcd . '
+                                                'Error %s' % str(ex)
+                                     }
+                        )
+                    )
                 break
 
 
 def main():
+    tendrl_ns.publisher_id = "node-agent"
     tendrl_ns.message_handler_thread = MessageHandler()
     tendrl_ns.central_store_thread = central_store.NodeAgentEtcdCentralStore()
     tendrl_ns.first_node_inventory_sync = True
@@ -89,7 +132,6 @@ def main():
     tendrl_ns.tendrl_context.save()
     tendrl_ns.definitions.save()
     tendrl_ns.config.save()
-    tendrl_ns.publisher_id = "node_agent"
 
     m = NodeAgentManager()
     m.start()
@@ -97,7 +139,13 @@ def main():
     complete = gevent.event.Event()
 
     def shutdown():
-        LOG.info("Signal handler: stopping")
+        Event(
+            Message(
+                priority="info",
+                publisher=tendrl_ns.publisher_id,
+                payload={"message": "Signal handler: stopping"}
+            )
+        )
         complete.set()
         m.stop()
 

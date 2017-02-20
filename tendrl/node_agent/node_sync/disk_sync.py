@@ -1,8 +1,7 @@
-import logging
+from tendrl.commons.event import Event
+from tendrl.commons.message import Message
 
 from tendrl.commons.utils import cmd_utils
-
-LOG = logging.getLogger(__name__)
 
 
 def get_node_disks():
@@ -25,7 +24,7 @@ def get_node_disks():
             columns)
         cmd = cmd_utils.Command(lsblk)
         out, err, rc = cmd.run(tendrl_ns.config.data[
-                                   'tendrl_ansible_exec_file'])
+                               'tendrl_ansible_exec_file'])
         if not err:
             devlist = map(
                 lambda line: dict(zip(keys, line.split(' '))),
@@ -79,9 +78,21 @@ def get_node_disks():
                         else:
                             rv['used_disks_id'].append(disk['disk_id'])
         else:
-            LOG.error(err)
+            Event(
+                Message(
+                    priority="error",
+                    publisher=tendrl_ns.publisher_id,
+                    payload={"message": err}
+                )
+            )
     else:
-        LOG.error(err)
+        Event(
+            Message(
+                priority="error",
+                publisher=tendrl_ns.publisher_id,
+                payload={"message": err}
+            )
+        )
     return rv
 
 
