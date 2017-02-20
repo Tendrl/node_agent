@@ -50,6 +50,7 @@ install -Dm 0644 tendrl-node-agent.service $RPM_BUILD_ROOT%{_unitdir}/tendrl-nod
 install -Dm 0644 etc/tendrl/node-agent/node-agent.conf.yaml.sample $RPM_BUILD_ROOT%{_sysconfdir}/tendrl/node-agent/node-agent.conf.yaml
 install -Dm 0644 etc/tendrl/node-agent/logging.yaml.syslog.sample $RPM_BUILD_ROOT%{_sysconfdir}/tendrl/node-agent/node-agent_logging.yaml
 install -Dm 644 etc/tendrl/node-agent/*.sample $RPM_BUILD_ROOT%{_datadir}/tendrl/node-agent/
+install -Dm 644 etc/tendrl/node-agent/node-agent-socket.conf.sample $RPM_BUILD_ROOT%{_usr}/lib/tmpfiles.d/node-agent-socket.conf 
 
 %post
 %systemd_post tendrl-node-agent.service
