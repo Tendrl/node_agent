@@ -1,0 +1,3 @@
+# Create volatile directory for node-agent socket
+
+d /run/tendrl 0755 root root -

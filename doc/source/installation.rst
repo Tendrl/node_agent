@@ -60,6 +60,7 @@ enviroment which we have created during installation of *commons*.
 
     $ cp etc/tendrl/node-agent/logging.yaml.syslog.sample /etc/tendrl/node-agent_logging.yaml
     $ cp etc/tendrl/node-agent/node-agent-dev.conf.yaml /etc/tendrl/node-agent/node-agent.conf.yaml
+    $ cp etc/tendrl/node-agent/node-agent-socket.conf.sample /usr/lib/tmpfiles.d/node-agent-socket.conf 
 
 5. Add suitable configuration in config file by updating following lines to
    tendrl configfile(/etc/tendrl/tendrl.conf)::
