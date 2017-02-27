@@ -285,6 +285,126 @@ namespace.tendrl.node_agent:
           type: String
       enabled: true
       list: nodes/$Node_context.node_id/Disks/free
+    Message:
+      attrs:
+        message_id:
+          help: "Message UUID"
+          type: String
+        timestamp:
+          help: "time"
+          type: Time
+        priority:
+          help: "Message priority"
+          type: String
+        publisher:
+          help: "Message publisher"
+          type: String
+        node_id:
+          help: "node id"
+          type: String
+        payload:
+          help: "Differ based on message"
+          type: Dict
+        caller:
+          help: "Called details"
+          type: Dict
+      enabled: true
+      list: /Messages
+      help: "Messages"
+      value: /Messages
+    NodeMessage:
+      attrs:
+        message_id:
+          help: "Message UUID"
+          type: String
+        timestamp:
+          help: "time"
+          type: Time
+        priority:
+          help: "Message priority"
+          type: String
+        publisher:
+          help: "Message publisher"
+          type: String
+        node_id:
+          help: "node id"
+          type: String
+        payload:
+          help: "Differ based on message"
+          type: Dict
+        caller:
+          help: "Called details"
+          type: Dict
+      enabled: true
+      list: node/$Node_context.node_id/Messages
+      help: "Node Messages"
+      value: node/$Node_context.node_id/Messages
+    ClusterMessage:
+      attrs:
+        message_id:
+          help: "Message UUID"
+          type: String
+        timestamp:
+          help: "time"
+          type: Time
+        priority:
+          help: "Message priority"
+          type: String
+        publisher:
+          help: "Message publisher"
+          type: String
+        node_id:
+          help: "node id"
+          type: String
+        payload:
+          help: "Differ based on message"
+          type: Dict
+        caller:
+          help: "Called details"
+          type: Dict
+      enabled: true
+      list: clusters/$TendrlContext.integration_id/Messages
+      help: "Cluster Messages"
+      value: clusters/$TendrlContext.integration_id/Messages
+    JobUpdate:
+      attrs:
+        message_id:
+          help: "Message UUID"
+          type: String
+        timestamp:
+          help: "time"
+          type: Time
+        priority:
+          help: "Message priority"
+          type: String
+        publisher:
+          help: "Message publisher"
+          type: String
+        node_id:
+          help: "node id"
+          type: String
+        payload:
+          help: "Differ based on message"
+          type: Dict
+        request_id:
+          help: "Job id"
+          type: String
+        flow_id:
+          help: "Flow id"
+          type: String
+        parent_id:
+          help: "parent id"
+          type: String
+        cluster_id:
+          help: "cluster id"
+          type: String
+        caller:
+          help: "Called details"
+          type: Dict
+      enabled: true
+      list: $request_id
+      help: "Job Updates"
+      value: $request_id
     Node:
       atoms:
         cmd:
@@ -423,6 +543,28 @@ namespace.tendrl.node_agent:
       list: nodes/$Node_context.node_id/Node_context
       value: nodes/$Node_context.node_id/Node_context
       help: Node Context
+    ClusterNodeContext:
+      attrs:
+        machine_id:
+          help: "Unique /etc/machine-id"
+          type: String
+        fqdn:
+          help: "FQDN of the Tendrl managed node"
+          type: String
+        node_id:
+          help: "Tendrl ID for the managed node"
+          type: String
+        tags:
+          help: "The tags associated with this node"
+          type: String
+        status:
+          help: "Node status"
+          type: String
+
+      enabled: true
+      list: clusters/$TendrlContext.integration_id/nodes/$Node_context.node_id/Node_context
+      value: clusters/$TendrlContext.integration_id/nodes/$Node_context.node_id/Node_context
+      help: Cluster leval Node Context
     File:
       atoms:
         write:
