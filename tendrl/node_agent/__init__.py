@@ -7,6 +7,8 @@ else:
 
 from tendrl.commons import CommonNS
 
+from tendrl.node_agent import log
+
 from tendrl.node_agent.objects.definition import Definition
 from tendrl.node_agent.objects.config import Config
 from tendrl.node_agent.objects.node_context import NodeContext
@@ -36,5 +38,9 @@ class NodeAgentNS(CommonNS):
         self.to_str = "tendrl.node_agent"
         self.type = 'node'
         super(NodeAgentNS, self).__init__()
+
+        log.setup_logging(
+            self.config.data['log_cfg_path'],
+        )
 
 NodeAgentNS()
