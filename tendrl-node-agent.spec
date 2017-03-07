@@ -12,6 +12,7 @@ BuildRequires: python-gevent
 BuildRequires: python-etcd
 BuildRequires: python-urllib3
 BuildRequires: python2-devel
+BuildRequires: python-setuptools
 BuildRequires: pytest
 BuildRequires: systemd
 BuildRequires: python-mock
@@ -26,6 +27,7 @@ Requires: tendrl-commons
 Requires: hwinfo 
 Requires: python-netifaces
 Requires: python-netaddr
+Requires: python-setuptools
 
 %description
 Python module for Tendrl node bridge to manage storage node in the sds cluster
