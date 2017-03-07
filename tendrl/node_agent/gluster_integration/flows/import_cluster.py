@@ -27,18 +27,19 @@ class ImportCluster(base_flow.BaseFlow):
                     new_params = self.parameters.copy()
                     new_params['Node[]'] = [node]
                 # create same flow for each node in node list except $this
-                    job = {"integration_id": cluster_id,
+                    payload = {"integration_id": cluster_id,
                            "node_id": node,
-                           "run": self.name, "status": "new", "parameters":
-                               new_params, "parent": self.job['request_id'],
+                           "run": self.name, "parameters":
+                               new_params, "parent": self.job['job_id'],
                            "type": "node"}
-                    if "etcd_orm" in job['parameters']:
-                        del job['parameters']['etcd_orm']
-                    if "manager" in job['parameters']:
-                        del job['parameters']['manager']
+                    if "etcd_orm" in payload['parameters']:
+                        del payload['parameters']['etcd_orm']
+                    if "manager" in payload['parameters']:
+                        del payload['parameters']['manager']
+                    Job(job_id=str(uuid.uuid4()),
+                        status="new",
+                        payload=json.dumps(payload)).save()
 
-                    self.etcd_orm.client.write("/queue/%s" % uuid.uuid4(),
-                                               json.dumps(job))
         if curr_node_id in node_list:
             self.parameters['fqdn'] = socket.getfqdn()
             installation_source_type = self.config.get(

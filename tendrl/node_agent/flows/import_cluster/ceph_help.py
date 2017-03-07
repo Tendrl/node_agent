@@ -6,7 +6,7 @@ from tendrl.commons.utils import ansible_module_runner
 import yaml
 
 
-def import_ceph(integration_id, request_id, flow_id):
+def import_ceph(integration_id, job_id, flow_id):
     attributes = {}
     if tendrl_ns.config.data['package_source_type'] == 'pip':
         name = "git+https://github.com/Tendrl/ceph-integration.git@v1.2.1"
@@ -38,7 +38,7 @@ def import_ceph(integration_id, request_id, flow_id):
                 "message": "Installed storage binaries on node %s" %
                 tendrl_ns.node_context.fqdn
             },
-            request_id=request_id,
+            job_id=job_id,
             flow_id=flow_id,
             cluster_id=integration_id,
         )
@@ -68,7 +68,7 @@ def import_ceph(integration_id, request_id, flow_id):
             payload={
                 "message": "Created ceph integration configuration file"
             },
-            request_id=request_id,
+            job_id=job_id,
             flow_id=flow_id,
             cluster_id=integration_id,
         )
@@ -84,7 +84,7 @@ def import_ceph(integration_id, request_id, flow_id):
                 "message": "Started ceph integration daemon on node %s" %
                 tendrl_ns.node_context.fqdn
             },
-            request_id=request_id,
+            job_id=job_id,
             flow_id=flow_id,
             cluster_id=integration_id,
         )
