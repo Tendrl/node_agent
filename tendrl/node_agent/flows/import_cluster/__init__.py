@@ -31,14 +31,16 @@ class ImportCluster(flows.NodeAgentBaseFlow):
                     new_params['Node[]'] = [node]
                     # create same flow for each node in node list except $this
                     # TODO(team) The .save() below needs to save the job exactly as the API does
+                    payload = {"integration_id": integration_id,
+                               "node_ids": [node],
+                               "run": "tendrl.node_agent.flows.ImportCluster",
+                               "parameters": new_params,
+                               "parent": self.parameters['job_id'],
+                               "type": "node"
+                               }
                     Job(job_id=str(uuid.uuid4()),
-                        integration_id=integration_id,
-                        run="tendrl.node_agent.flows.ImportCluster",
                         status="new",
-                        parameters=new_params,
-                        type="node",
-                        parent=self.parameters['request_id'],
-                        node_ids=[node]).save()
+                        payload=json.dumps(payload)).save()
 
                     Event(
                         Message(
@@ -48,7 +50,7 @@ class ImportCluster(flows.NodeAgentBaseFlow):
                                 "message": "Import cluster job created on node"
                                 " %s" % node
                             },
-                            request_id=self.parameters['request_id'],
+                            job_id=self.parameters['job_id'],
                             flow_id=self.uuid,
                             cluster_id=tendrl_ns.tendrl_context.integration_id,
                         )
@@ -62,7 +64,7 @@ class ImportCluster(flows.NodeAgentBaseFlow):
                     "message": "Import cluster job started on node %s" %
                     tendrl_ns.node_context.fqdn
                 },
-                request_id=self.parameters['request_id'],
+                job_id=self.parameters['job_id'],
                 flow_id=self.uuid,
                 cluster_id=tendrl_ns.tendrl_context.integration_id,
             )
@@ -73,13 +75,13 @@ class ImportCluster(flows.NodeAgentBaseFlow):
             if "mon" in node_context.tags:
                 import_ceph(
                     tendrl_ns.tendrl_context.integration_id,
-                    self.parameters['request_id'],
+                    self.parameters['job_id'],
                     self.uuid
                 )
         else:
             import_gluster(
                 tendrl_ns.tendrl_context.integration_id,
-                self.parameters['request_id'],
+                self.parameters['job_id'],
                 self.uuid
             )
 
