@@ -9,6 +9,7 @@ from tendrl.node_agent import central_store
 from tendrl.node_agent.discovery.platform.manager import PlatformManager
 from tendrl.node_agent.discovery.sds.manager import SDSDiscoveryManager
 from tendrl.node_agent.message.handler import MessageHandler
+from tendrl.node_agent.provisioner.ceph.manager import ProvisioningManager
 from tendrl.node_agent import node_sync
 LOG = logging.getLogger(__name__)
 
@@ -84,6 +85,8 @@ def main():
     tendrl_ns.central_store_thread = central_store.NodeAgentEtcdCentralStore()
     tendrl_ns.first_node_inventory_sync = True
     tendrl_ns.state_sync_thread = node_sync.NodeAgentSyncThread()
+    # TODO the prov plugin to read from a config file
+    tendrl_ns.provisioner = ProvisioningManager("CephInstallerPlugin")
 
     tendrl_ns.node_context.save()
     tendrl_ns.tendrl_context.save()
