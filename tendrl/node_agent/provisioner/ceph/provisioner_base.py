@@ -55,3 +55,7 @@ class ProvisionerBasePlugin(object):
     @abstractmethod
     def task_status(self, task_id):
         raise NotImplementedError()
+
+    @abstractmethod
+    def setup(self):
+        raise NotImplementedError()
