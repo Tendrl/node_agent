@@ -59,8 +59,9 @@ class NodeAgentSyncThread(sds_sync.StateSyncThread):
 
                 # updating node context with latest tags
                 LOG.info("node_sync, updating node context data with tags")
-                tags += NS.node_context.tags
-                NS.tendrl.objects.NodeContext(tags=tags).save()
+                tags += NS.node_context.tags.split(",")
+                tags = list(set(tags))
+                NS.tendrl.objects.NodeContext(tags=",".join(tags)).save()
                 gevent.sleep(interval)
 
                 if NS.tendrl_context.integration_id:
