@@ -1,0 +1,115 @@
+#! /bin/bash
+#
+# node-agent      Start/Stop the node agent daemon
+#
+# chkconfig: - 65 10
+# description: node-agent is a python agent local to every managed
+# storage node in the sds cluster
+# processname: node-agent
+
+### BEGIN INIT INFO
+# Provides: node-agent
+# Required-Start: $local_fs $network
+# Required-Stop: $local_fs $network
+# Short-Description: Start/Stop the node agent daemon
+# Description: node-agent is a python agent resides on every node
+# managed by tendlr. It is responsible for operating system level operations
+# such as hardware inventory, service management, process monitoring etc.
+# Also, serves as the provisioning controller and invoke provisioning
+# operations on the node.
+### END INIT INFO
+
+# Source function library.
+. /etc/init.d/functions
+
+# Source our configuration file for these variables.
+SOCKETDIR=/var/run/tendrl
+MECH=shadow
+FLAGS=
+if [ -f /etc/sysconfig/node-agent ] ; then
+        . /etc/sysconfig/node-agent
+fi
+
+RETVAL=0
+
+# Set up some common variables before we launch into what might be
+# considered boilerplate by now.
+prog=node-agent
+path=/usr/sbin/node-agent
+lockfile=/var/lock/subsys/$prog
+pidfile=/var/run/node-agent/node-agent.pid
+
+start() {
+        [ -x $path ] || exit 5
+        echo -n $"Starting $prog: "
+        daemon $DAEMONOPTS $path -m $SOCKETDIR -a $MECH $FLAGS
+        RETVAL=$?
+        echo
+        [ $RETVAL -eq 0 ] && touch $lockfile
+        return $RETVAL
+}
+
+stop() {
+        echo -n $"Stopping $prog: "
+        killproc $prog
+        RETVAL=$?
+        echo
+        [ $RETVAL -eq 0 ] && rm -f $lockfile
+        return $RETVAL
+}       
+
+restart() {
+        stop
+        start
+}       
+
+reload() {
+        restart
+}
+
+force_reload() {
+        restart
+}
+
+rh_status() {
+        # run checks to determine if the service is running or use generic status
+        status -p $pidfile $prog
+}
+
+rh_status_q() {
+        rh_status >/dev/null 2>&1
+}            
+
+case "$1" in
+  start)
+        rh_status_q && exit 0
+        start
+        ;;
+  stop)
+        rh_status_q || exit 0
+        stop
+        ;;
+  restart)
+        restart
+        ;;
+  reload)
+        rh_status_q || exit 7
+        reload
+        ;;
+  force-reload)
+        force_reload
+        ;;
+  status)
+        rh_status
+        ;;
+  condrestart|try-restart)
+        rh_status_q || exit 0
+        restart
+        ;;
+  *)
+        echo $"Usage: $0 {start|stop|status|restart|condrestart|try-restart|reload|force-reload}"
+        exit 2
+esac
+
+exit $?
+
