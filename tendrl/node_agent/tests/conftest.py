@@ -3,6 +3,14 @@ import pytest
 import re
 
 
+@pytest.fixture
+def definitions_path():
+    """Get absolute path to definitions file."""
+
+    return os.path.abspath(os.path.dirname(os.path.realpath(__file__)) +
+                           "/../../../etc/tendrl_definitions_node_agent.yaml")
+
+
 def get_defined_functions(file_path):
     """Get list of runable functions from definitions."""
 
@@ -15,9 +23,7 @@ def get_defined_functions(file_path):
     return functions
 
 
-@pytest.fixture(params=get_defined_functions(
-    os.path.dirname(os.path.realpath(__file__)) +
-    "/../../../etc/tendrl_definitions_node_agent.yaml"))
+@pytest.fixture(params=get_defined_functions(definitions_path()))
 def defined_function(request):
     """Generate function names for import."""
 
