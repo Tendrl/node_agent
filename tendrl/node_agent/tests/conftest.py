@@ -15,12 +15,24 @@ def get_defined_functions(file_path):
     """Get list of runable functions from definitions."""
 
     functions = []
+    list_search = False
     with open(file_path, 'r') as f:
         for line in f:
-            match = re.search("run:\s*(?P<run>[a-zA-Z0-9-._])*", line)
-            if match is not None:
-                functions.append(match.group())
-    return functions
+            if not list_search:
+                match = re.search("run:\s*(?P<run>[a-zA-Z0-9\._]+)", line)
+                if match is not None:
+                    functions.append(match.group("run"))
+                    list_search = False
+            else:
+                match = re.search("- (?P<_run>[a-zA-Z0-9\._]+)", line)
+                if match is not None:
+                    functions.append(match.group("_run"))
+                else:
+                    list_search = False
+            match2 = re.search("run:$", line)
+            if match2 is not None:
+                list_search = True
+    return list(set(functions))
 
 
 @pytest.fixture(params=get_defined_functions(definitions_path()))
