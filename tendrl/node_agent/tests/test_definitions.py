@@ -2,16 +2,16 @@ import pkgutil
 import yaml
 
 
-def test_valid_definitions(definitions_path):
+def test_valid_definitions(definitions_node_agent_path_yaml):
     """Check if `definitions` file is in a valid YAML format."""
 
     # TODO(fbalak) validate against some schema
     # http://stackoverflow.com/questions/3262569/validating-a-yaml-document-in-python
-    definitions = yaml.safe_load(definitions_path)
+    definitions = yaml.safe_load(definitions_node_agent_path_yaml)
     assert definitions is not None
 
 
-def test_defined_functions(defined_function):
+def test_defined_functions(definitions_run_attribute):
     """Check if `defined_function` can be imported."""
 
-    assert pkgutil.find_loader(defined_function)
+    assert pkgutil.find_loader(definitions_run_attribute)
