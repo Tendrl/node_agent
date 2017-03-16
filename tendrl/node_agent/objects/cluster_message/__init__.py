@@ -1,14 +1,17 @@
 from tendrl.commons import etcdobj
 from tendrl.commons.message import Message as message
-from tendrl.node_agent import objects
+from tendrl.commons import objects
 
 
-class ClusterMessage(message, objects.NodeAgentBaseObject):
+class ClusterMessage(message, objects.BaseObject):
     def __init__(self, **cluster_message):
         super(ClusterMessage, self).__init__(**cluster_message)
 
         self.value = 'clusters/%s/Messages/%s'
         self._etcd_cls = _ClusterMessageEtcd
+
+    def load_definition(self):
+        return {}
 
 
 class _ClusterMessageEtcd(etcdobj.EtcdObj):
