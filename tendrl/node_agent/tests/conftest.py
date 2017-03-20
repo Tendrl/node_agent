@@ -9,7 +9,12 @@ def definitions_node_agent_path_yaml():
 
     return os.path.abspath(
         os.path.join(
-            os.path.dirname(os.path.realpath(__file__)), "..","..","..","etc/tendrl_definitions_node_agent.yaml"))
+            os.path.dirname(os.path.realpath(__file__)),
+            "..",
+            "..",
+            "..",
+            "etc/tendrl_definitions_node_agent.yaml"))
+
 
 def get_run_attributes_from_yaml(file_path):
     """Get list of runable functions from definitions."""
