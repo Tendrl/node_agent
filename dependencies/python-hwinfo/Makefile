@@ -16,8 +16,10 @@ dist:
 
 srpm: dist
 	fedpkg --dist epel7 srpm
+	fedpkg --dist epel6 srpm
 
 rpm:  srpm
-	mock -r epel-7-x86_64 rebuild $(NAME)-$(VERSION)-1.src.rpm --resultdir=.
+	mock -r epel-7-x86_64 rebuild $(NAME)-$(VERSION)-1.el7.src.rpm --resultdir=.
+	mock -r epel-6-x86_64 rebuild $(NAME)-$(VERSION)-1.el6.src.rpm --resultdir=.
 
 .PHONY: dist rpm srpm

@@ -7,7 +7,7 @@
 Summary: Library for parsing hardware info on Linux OSes.
 Name: %{name}
 Version: %{version}
-Release: %{release}
+Release: %{release}%{?dist}
 Source0: %{name}-%{unmangled_version}.tar.gz
 License: GPLV2.1
 Group: Development/Libraries
