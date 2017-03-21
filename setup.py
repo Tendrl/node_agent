@@ -109,11 +109,8 @@ setup(
     license="LGPL-2.1+",
     zip_safe=False,
     install_requires=[
-        "gevent>=1.0",
         "netaddr",
-        "python-etcd",
         "netifaces",
-        "six",
         "tendrl-commons",
         "urllib3",
         ],
@@ -122,5 +119,6 @@ setup(
             'tendrl-node-agent = tendrl.node_agent.manager:main'
         ]
     },
+    include_package_data=True,
     cmdclass={'bumpversion': BumpVersionCommand, 'release': ReleaseCommand},
 )

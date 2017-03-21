@@ -12,7 +12,7 @@ from tendrl.node_agent.message.logger import Logger
 import traceback
 
 RECEIVE_DATA_SIZE = 4096
-SYSTEMD_SOCKET_PATH= "/var/run/tendrl/message.sock"
+SYSTEMD_SOCKET_PATH = "/var/run/tendrl/message.sock"
 
 
 class MessageHandler(gevent.greenlet.Greenlet):
@@ -23,7 +23,7 @@ class MessageHandler(gevent.greenlet.Greenlet):
             self.read_socket
         )
 
-    def read_socket(self, sock):
+    def read_socket(self, sock, *args):
         try:
             self.data = sock.recv(RECEIVE_DATA_SIZE)
             message = Message.from_json(self.data)

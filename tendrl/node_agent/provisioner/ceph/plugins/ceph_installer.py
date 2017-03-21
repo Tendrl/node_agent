@@ -1,13 +1,14 @@
 
 import json
 import logging
-import os
 import socket
 
 import urllib3
 
 from tendrl.node_agent.provisioner.ceph.provisioner_base import\
     ProvisionerBasePlugin
+from tendrl.node_agent.provisioner.ceph import utils as \
+    provisioner_utils
 
 LOG = logging.getLogger(__name__)
 
@@ -22,6 +23,7 @@ class CephInstallerPlugin(ProvisionerBasePlugin):
         self,
     ):
         self.http = urllib3.PoolManager()
+        self.monitor_secret = provisioner_utils.generate_auth_key()
 
     def set_provisioner_node(self, provisioner_node):
         self.provisioner_node = provisioner_node
@@ -90,8 +92,7 @@ class CephInstallerPlugin(ProvisionerBasePlugin):
             try:
                 res_data = json.loads(resp.data.decode('utf-8'))
             except (TypeError, ValueError, UnicodeError) as e:
-                raise Exception(
-                   'Server response was not valid JSON: %r' % e)
+                raise Exception('Server response was not valid JSON: %r' % e)
             return res_data['identifier']
         else:
             return None
@@ -136,7 +137,7 @@ class CephInstallerPlugin(ProvisionerBasePlugin):
             "host": host,
             "address": ip_address,
             "fsid": cluster_id,
-            "monitor_secret": "AQA7P8dWAAAAABAAH/tbiZQn/40Z8pr959UmEA==",
+            "monitor_secret": self.monitor_secret,
             "cluster_name": cluster_name,
             "cluster_network": cluster_network,
             "public_network": public_network,
