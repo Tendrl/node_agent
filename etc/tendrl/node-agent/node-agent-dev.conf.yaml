@@ -4,3 +4,6 @@ etcd_connection: 0.0.0.0
 log_cfg_path: /etc/tendrl/node-agent/node-agent_logging.yaml
 log_level: DEBUG
 package_source_type: pip
+min_reqd_gluster_ver: 3.9.0
+tags:
+  - tendrl/node
