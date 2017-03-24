@@ -26,6 +26,9 @@ class NodeAgentEtcdCentralStore(central_store.EtcdCentralStore):
     def save_tendrlcontext(self, tendrl_context):
         NS.etcd_orm.save(tendrl_context)
 
+    def save_clustertendrlcontext(self, cluster_tendrl_context):
+        NS.etcd_orm.save(cluster_tendrl_context)
+
     def save_service(self, service):
         NS.etcd_orm.save(service)
 
