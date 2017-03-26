@@ -8,9 +8,6 @@ Source0: %{name}-%{version}.tar.gz
 License: LGPLv2+
 URL: https://github.com/Tendrl/node-agent
 
-BuildRequires: ansible
-BuildRequires: python-gevent
-BuildRequires: python-etcd
 BuildRequires: python-urllib3
 BuildRequires: python2-devel
 BuildRequires: pytest
@@ -18,17 +15,15 @@ BuildRequires: pytest
 BuildRequires: systemd
 %endif
 BuildRequires: python-mock
+BuildRequires: python-setuptools
 
-Requires: ansible
-Requires: python-etcd
-Requires: python-gevent
-Requires: python-greenlet
 Requires: collectd
 Requires: python-jinja2
 Requires: tendrl-commons
 Requires: python-hwinfo 
 Requires: python-netifaces
 Requires: python-netaddr
+Requires: python-setuptools
 
 %description
 Python module for Tendrl node bridge to manage storage node in the sds cluster

@@ -1,0 +1,26 @@
+---
+namespace.integrations.gluster:
+  flows:
+    ImportCluster:
+      atoms:
+        - tendrl.node_agent.objects.Package.atoms.install
+        - tendrl.node_agent.gluster_integration.objects.Config.atoms.generate
+        - tendrl.node_agent.objects.File.atoms.write
+        - tendrl.node_agent.objects.Node.atoms.cmd
+      help: "Import existing Gluster Cluster"
+      enabled: true
+      inputs:
+        mandatory:
+          - "Node[]"
+          - TendrlContext.sds_name
+          - TendrlContext.sds_version
+          - TendrlContext.integration_id
+      post_run:
+        - tendrl.node_agent.gluster_integration.objects.TendrlContext.atoms.check_cluster_id_exists
+      pre_run:
+        - tendrl.node_agent.objects.Node.atoms.check_node_up
+        - tendrl.node_agent.objects.TendrlContext.atoms.compare
+      run: integrations.gluster.flows.ImportCluster
+      type: Create
+      uuid: 2f94a48a-05d7-408c-b400-e27827f4edef
+      version: 1

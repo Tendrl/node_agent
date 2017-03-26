@@ -16,13 +16,13 @@ class Logger(object):
     def __init__(self, message):
         self.message = message
         self.push_messages()
-        if self.message.request_id is not None:
-            """ If request_id is present then
-
+        if self.message.job_id is not None:
+            """ If job_id is present then
             it is considered as operation
             """
             self._logger(self.push_operation())
         else:
+            self.push_event()
             if "exception_traceback" in message.payload:
                 self._logger("%s - %s: %s" % (
                     self.message.payload["message"],
@@ -32,12 +32,16 @@ class Logger(object):
                 self._logger(self.message.payload["message"])
 
     def push_operation(self):
-        tendrl_ns.etcd_orm.client.write(
-            self.message.request_id,
+        NS.etcd_orm.client.write(
+            "/Messages/jobs/%s" % self.message.job_id,
             Message.to_json(self.message),
             append=True)
+        NS.etcd_orm.client.refresh(
+            "/Messages/jobs/%s" % self.message.job_id,
+            ttl=NS.config.data['message_retention_time']
+        )
         log_message = ("%s:%s") % (
-            self.message.request_id,
+            self.message.job_id,
             self.message.payload["message"])
         return log_message
 
@@ -46,7 +50,7 @@ class Logger(object):
             "info", "debug"]:
             # Stroring messages cluster wise
             if self.message.cluster_id is not None:
-                tendrl_ns.node_agent.objects.ClusterMessage(
+                NS.node_agent.objects.ClusterMessage(
                     message_id=self.message.message_id,
                     timestamp=self.message.timestamp,
                     priority=self.message.priority,
@@ -54,14 +58,14 @@ class Logger(object):
                     node_id=self.message.node_id,
                     payload=self.message.payload,
                     cluster_id=self.message.cluster_id,
-                    request_id=self.message.request_id,
+                    job_id=self.message.job_id,
                     flow_id=self.message.flow_id,
                     parent_id=self.message.parent_id,
                     caller=self.message.caller
                 ).save()
             # storing messages node wise
             else:
-                tendrl_ns.node_agent.objects.NodeMessage(
+                NS.node_agent.objects.NodeMessage(
                     message_id=self.message.message_id,
                     timestamp=self.message.timestamp,
                     priority=self.message.priority,
@@ -69,12 +73,17 @@ class Logger(object):
                     node_id=self.message.node_id,
                     payload=self.message.payload,
                     cluster_id=self.message.cluster_id,
-                    request_id=self.message.request_id,
+                    job_id=self.message.job_id,
                     flow_id=self.message.flow_id,
                     parent_id=self.message.parent_id,
                     caller=self.message.caller
                 ).save()
-            tendrl_ns.node_agent.objects.Message(
+
+    def push_event(self):
+        # storing messages in global under event
+        if self.message.priority not in [
+            "info", "debug"]:
+            NS.node_agent.objects.Message(
                 message_id=self.message.message_id,
                 timestamp=self.message.timestamp,
                 priority=self.message.priority,
@@ -82,7 +91,7 @@ class Logger(object):
                 node_id=self.message.node_id,
                 payload=self.message.payload,
                 cluster_id=self.message.cluster_id,
-                request_id=self.message.request_id,
+                job_id=self.message.job_id,
                 flow_id=self.message.flow_id,
                 parent_id=self.message.parent_id,
                 caller=self.message.caller

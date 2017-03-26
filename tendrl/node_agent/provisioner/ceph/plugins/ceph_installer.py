@@ -1,10 +1,14 @@
 
 import json
 import logging
+import socket
+
 import urllib3
 
 from tendrl.node_agent.provisioner.ceph.provisioner_base import\
     ProvisionerBasePlugin
+from tendrl.node_agent.provisioner.ceph import utils as \
+    provisioner_utils
 
 LOG = logging.getLogger(__name__)
 
@@ -19,6 +23,7 @@ class CephInstallerPlugin(ProvisionerBasePlugin):
         self,
     ):
         self.http = urllib3.PoolManager()
+        self.monitor_secret = provisioner_utils.generate_auth_key()
 
     def set_provisioner_node(self, provisioner_node):
         self.provisioner_node = provisioner_node
@@ -87,8 +92,7 @@ class CephInstallerPlugin(ProvisionerBasePlugin):
             try:
                 res_data = json.loads(resp.data.decode('utf-8'))
             except (TypeError, ValueError, UnicodeError) as e:
-                raise Exception(
-                   'Server response was not valid JSON: %r' % e)
+                raise Exception('Server response was not valid JSON: %r' % e)
             return res_data['identifier']
         else:
             return None
@@ -98,9 +102,10 @@ class CephInstallerPlugin(ProvisionerBasePlugin):
         host,
         cluster_id,
         cluster_name,
+        ip_address,
         cluster_network,
         public_network,
-        mons
+        monitors
     ):
         url = 'http://localhost:%s/api/mon/configure' % \
             self._CEPH_INSTALLER_API_PORT
@@ -129,19 +134,18 @@ class CephInstallerPlugin(ProvisionerBasePlugin):
 
         data = {
             "calamari": False,
-            "conf": {"global": {"auth supported": "cephx"}},
             "host": host,
-            "interface": "eth0",
+            "address": ip_address,
             "fsid": cluster_id,
-            "monitor_secret": "AQA7P8dWAAAAABAAH/tbiZQn/40Z8pr959UmEA==",
+            "monitor_secret": self.monitor_secret,
             "cluster_name": cluster_name,
             "cluster_network": cluster_network,
             "public_network": public_network,
             "redhat_storage": False,
             "verbose": False
         }
-        if mons is not None:
-            data.update({"mons": mons})
+        if monitors is not None:
+            data.update({"monitors": monitors})
         resp = self.http.request(
             self._MPOST,
             url,
@@ -166,7 +170,7 @@ class CephInstallerPlugin(ProvisionerBasePlugin):
         journal_size,
         cluster_network,
         public_network,
-        mons
+        monitors
     ):
         url = 'http://localhost:%s/api/osd/configure' % \
             self._CEPH_INSTALLER_API_PORT
@@ -198,7 +202,6 @@ class CephInstallerPlugin(ProvisionerBasePlugin):
         # OSDs and Journals.
 
         data = {
-            "conf": {"global": {"auth supported": "cephx"}},
             "devices": devices,
             "host": host,
             "fsid": cluster_id,
@@ -206,7 +209,7 @@ class CephInstallerPlugin(ProvisionerBasePlugin):
             "cluster_name": cluster_name,
             "cluster_network": cluster_network,
             "public_network": public_network,
-            "monitors": mons,
+            "monitors": monitors,
             "redhat_storage": False,
             "verbose": False
         }
@@ -252,3 +255,13 @@ class CephInstallerPlugin(ProvisionerBasePlugin):
             return res_data
         else:
             return None
+
+    def setup(self):
+        url = 'http://%s:%s/setup/' % (socket.gethostbyname(
+            socket.gethostname()), self._CEPH_INSTALLER_API_PORT)
+        resp = self.http.request(
+            self._MGET,
+            url)
+        if resp.status == 200:
+            resp_data = resp.data.decode("utf-8")
+            return resp_data

@@ -1,13 +1,16 @@
+import logging
+
 import netaddr
 import netifaces as ni
+
 from tendrl.commons.utils import cmd_utils
-import logging
 
 LOG = logging.getLogger(__name__)
 
 
 def get_node_network():
     """return
+
            [{"ipv4": ["ipv4address", ...],
              "ipv6": ["ipv6address, ..."],
              "netmask": ["subnet", ...],
@@ -28,8 +31,7 @@ def get_node_network():
     rv = []
     network_interfaces = get_node_interface()
     cmd = cmd_utils.Command('hwinfo --network')
-    out, err, rc = cmd.run(tendrl_ns.config.data[
-                           'tendrl_ansible_exec_file'])
+    out, err, rc = cmd.run()
     if not err:
         for interface in out.split('\n\n'):
             devlist = {"interface_id": "",
@@ -84,13 +86,17 @@ def get_node_network():
 
 
 def get_node_interface():
-    '''returns structure
+
+    """returns structure
+
     {"interface_name": {"ipv4": ["ipv4address", ...],
                         "ipv6": ["ipv6address", ...]
                         "netmask": ["subnet", ...],
                         "subnet": "subnet",
                         "status":"up/down"},...}
-    '''
+
+    """
+
     interfaces = ni.interfaces()
     rv = {}
     invalid = 'lo'
@@ -143,9 +149,11 @@ def get_subnet(ipv4, netmask):
 
 
 def Check_interface_status(interface):
-    status = ""
-    cmd = cmd_utils.Command(
-        "cat /sys/class/net/%s/operstate" % interface)
-    out, err, rc = cmd.run(tendrl_ns.config.data[
-                           'tendrl_ansible_exec_file'])
-    return out, err
+    status = "unknown"
+    err = None
+    try:
+        with open('/sys/class/net/%s/operstate' % interface, 'r') as f:
+            status = f.read().strip('\n')
+    except IOError as ex:
+        err = str(ex)
+    return status, err
