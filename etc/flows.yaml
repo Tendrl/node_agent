@@ -1,0 +1,112 @@
+---
+object_details:
+  flows:
+      execute_command:
+          uuid: "9bbc8ca2-ffda-4f18-9c7f-22b5cb6f1ef2"
+          name: "execute_command"
+          atoms:
+            [command]
+          conditions:
+            pre_conditions: None
+            post_conditions: None
+          run: "flow.execute_command.run.run(*args, **kwargs)"
+      manage_dnf_package:
+          uuid: "faafaae1-5e26-4e14-a312-d345b25dcccf"
+          name: "manage_dnf_package"
+          atoms:
+            [dnf]
+          conditions:
+            pre_conditions: None
+            post_conditions: None
+          run: "flow.manage_dnf_package.run.run(*args, **kwargs)"
+      manage_file:
+          uuid: "0cfd1ed1-cb56-45d5-86d8-8cefee5c1a37"
+          name: "manage_file"
+          atoms:
+            [file]
+          conditions:
+            pre_conditions: None
+            post_conditions: None
+          run: "flow.manage_file.run.run(*args, **kwargs)"
+      make_filesystem:
+          uuid: "36bd5486-a0ec-46cd-9b57-913a7e758ec0"
+          name: "make_filesystem"
+          atoms:
+            [filesystem]
+          conditions:
+            pre_conditions: None
+            post_conditions: None
+          run: "flow.make_filesystem.run.run(*args, **kwargs)"
+      manage_firewall:
+          uuid: "546b8aa7-2b47-4396-9b45-6e555101505b"
+          name: "manage_firewall"
+          atoms:
+            [firewalld]
+          conditions:
+            pre_conditions: None
+            post_conditions: None
+          run: "flow.manage_firewall.run.run(*args, **kwargs)"
+      manage_mount:
+          uuid: "6cab45c2-d0d3-4c02-a833-cdf4aa5dcca0"
+          name: "manage_mount"
+          atoms:
+            [mount]
+          conditions:
+            pre_conditions: None
+            post_conditions: None
+          run: "flow.manage_mount.run.run(*args, **kwargs)"
+      run_script:
+          uuid: "776fb62c-2cfc-4064-b536-02167876a29f"
+          name: "run_script"
+          atoms:
+            [script]
+          conditions:
+            pre_conditions: None
+            post_conditions: None
+          run: "flow.run_script.run.run(*args, **kwargs)"
+      manage_selinux:
+          uuid: "757cbabb-3e3f-4855-be0a-02798540360e"
+          name: "manage_selinux"
+          atoms:
+            [selinux]
+          conditions:
+            pre_conditions: None
+            post_conditions: None
+          run: "flow.manage_selinux.run.run(*args, **kwargs)"
+      manage_service:
+          uuid: "88c9fbe3-0a40-47b5-be58-33505fe8df24"
+          name: "manage_service"
+          atoms:
+            [service]
+          conditions:
+            pre_conditions: None
+            post_conditions: None
+          run: "flow.manage_service.run.run(*args, **kwargs)"
+      manage_supervisord_programs:
+          uuid: "a559e06b-ba2b-46eb-9a5e-4150fb976c04"
+          name: "manage_supervisord_programs"
+          atoms:
+            [supervisorctl]
+          conditions:
+            pre_conditions: None
+            post_conditions: None
+          run: "flow.manage_supervisord_programs.run.run(*args, **kwargs)"
+      manage_systemd_services:
+          uuid: "d4e30e1e-b573-42d9-a873-205a2b96f205"
+          name: "manage_systemd_services"
+          atoms:
+            [systemd]
+          conditions:
+            pre_conditions: None
+            post_conditions: None
+          run: "flow.manage_systemd_services.run.run(*args, **kwargs)"
+      manage_yum_packages:
+          uuid: "f430eaca-7e28-4ab0-a8ad-d5e97728ba17"
+          name: "manage_yum_packages"
+          atoms:
+            [yum]
+          conditions:
+            pre_conditions: None
+            post_conditions: None
+          run: "flow.manage_yum_packages.run.run(*args, **kwargs)"
+---
