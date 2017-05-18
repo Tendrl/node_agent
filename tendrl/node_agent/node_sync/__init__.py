@@ -254,56 +254,21 @@ class NodeAgentSyncThread(sds_sync.StateSyncThread):
                     )
                 )
                 disks = disk_sync.get_node_disks()
-                try:
-                    all_disk_id = []
-                    all_disk_id.extend(disks["used_disks_id"])
-                    all_disk_id.extend(disks["free_disks_id"])
-                    if all_disk_id:
-                        all_disk = NS._int.client.read(
-                            ("nodes/%s/Disks/all") % NS.node_context.node_id)
-                        for disk in all_disk.leaves:
-                            did = disk.key.split('/')[-1]
-                            if did not in all_disk_id:
-                                NS._int.wclient.delete(
-                                    ("nodes/%s/Disks/all/%s") %
-                                        (NS.node_context.node_id, did), recursive=True)
-                                try:
-                                    NS._int.wclient.delete(
-                                    ("nodes/%s/Disks/used/%s") %
-                                        (NS.node_context.node_id, did))
-                                except etcd.EtcdKeyNotFound as ex:
-                                    pass
-
-                                try:
-                                    NS._int.wclient.delete(
-                                    ("nodes/%s/Disks/free/%s") %
-                                        (NS.node_context.node_id, did))
-                                except etcd.EtcdKeyNotFound as ex:
-                                    pass
-                except etcd.EtcdKeyNotFound as ex:
-                    Event(
-                        ExceptionMessage(
-                            priority="debug",
-                            publisher=NS.publisher_id,
-                            payload={"message": "Given key is not present in "
-                                                "etcd .",
-                                                "exception": ex
-                                     }
-                        )
-                    )
                 if "disks" in disks:
                     for disk in disks['disks']:
-                        NS.tendrl.objects.Disk(**disk).save()
+                        NS.tendrl.objects.Disk(**disk).save(ttl=200)
                 if "used_disks_id" in disks:
                     for disk in disks['used_disks_id']:
                         NS._int.wclient.write(
                             ("nodes/%s/Disks/used/%s") % (
-                                NS.node_context.node_id, disk), "")
+                                NS.node_context.node_id,
+                                disks['used_disks_id'][disk]), disk, ttl=200)
                 if "free_disks_id" in disks:
                     for disk in disks['free_disks_id']:
                         NS._int.wclient.write(
                             ("nodes/%s/Disks/free/%s") % (
-                                NS.node_context.node_id, disk), "")
+                                NS.node_context.node_id,
+                                disks['free_disks_id'][disk]), disk, ttl=200)
 
                 Event(
                     Message(

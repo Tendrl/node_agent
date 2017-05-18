@@ -7,12 +7,12 @@ from tendrl.commons.utils import cmd_utils
 def get_node_disks():
     rv = {}
     rv["disks"] = []
-    rv["free_disks_id"] = []
-    rv["used_disks_id"] = []
+    rv["free_disks_id"] = {}
+    rv["used_disks_id"] = {}
     disks, err = get_all_disks()
     if err == "":
         columns = 'NAME,KNAME,PKNAME,MAJ:MIN,FSTYPE,MOUNTPOINT,LABEL,' \
-                  'UUID,' \
+                  'UUID,TYPE,' \
                   'RA,RO,RM,SIZE,STATE,OWNER,GROUP,MODE,ALIGNMENT,' \
                   'MIN-IO,OPT-IO,' \
                   'PHY-SEC,LOG-SEC,ROTA,SCHED,RQ-SIZE,DISC-ALN,' \
@@ -28,54 +28,70 @@ def get_node_disks():
             devlist = map(
                 lambda line: dict(zip(keys, line.split(' '))),
                 out.splitlines())
-            for disk in disks:
-                for dev_info in devlist:
-                    if dev_info['NAME'] == disk['device_name']:
-                        disk['disk_kernel_name'] = dev_info['KNAME']
-                        disk['parent_name'] = dev_info['PKNAME']
-                        disk['major_to_minor_no'] = dev_info['MAJ:MIN']
-                        disk['fstype'] = dev_info['FSTYPE']
-                        disk['mount_point'] = dev_info['MOUNTPOINT']
-                        disk['label'] = dev_info['LABEL']
-                        disk['fsuuid'] = dev_info['UUID']
-                        disk['read_ahead'] = dev_info['RA']
-                        if dev_info['RO'] == '0':
-                            disk['read_only'] = False
-                        else:
-                            disk['read_only'] = True
-                        if dev_info['RM'] == '0':
-                            disk['removable_device'] = False
-                        else:
-                            disk['removable_device'] = True
-                        disk['size'] = dev_info['SIZE']
-                        disk['state'] = dev_info['STATE']
-                        disk['owner'] = dev_info['OWNER']
-                        disk['group'] = dev_info['GROUP']
-                        disk['mode'] = dev_info['MODE']
-                        disk['alignment'] = dev_info['ALIGNMENT']
-                        disk['min_io_size'] = dev_info['MIN-IO']
-                        disk['optimal_io_size'] = dev_info['OPT-IO']
-                        disk['phy_sector_size'] = dev_info['PHY-SEC']
-                        disk['log_sector_size'] = dev_info['LOG-SEC']
-                        if disk['disk_type'] == "disk":
-                            disk['ssd'] = is_ssd(dev_info['ROTA'])
-                        else:
-                            disk['ssd'] = False
-                        disk['scheduler_name'] = dev_info['SCHED']
-                        disk['req_queue_size'] = dev_info['RQ-SIZE']
-                        disk['discard_align_offset'] = dev_info[
-                            'DISC-ALN']
-                        disk['discard_granularity'] = dev_info[
-                            'DISC-GRAN']
-                        disk['discard_max_bytes'] = dev_info[
-                            'DISC-MAX']
-                        disk['discard_zeros_data'] = dev_info[
-                            'DISC-ZERO']
-                        rv['disks'].append(disk)
-                        if disk['disk_type'] == "disk":
-                            rv['free_disks_id'].append(disk['disk_id'])
-                        else:
-                            rv['used_disks_id'].append(disk['disk_id'])
+            all_parents = []
+            parent_ids = []
+            for dev_info in devlist:
+                if dev_info['NAME'] in disks.keys():
+                    device_name = dev_info['NAME']
+                    disks[device_name]['disk_kernel_name'] = dev_info['KNAME']
+                    disks[device_name]['parent_name'] = dev_info['PKNAME']
+                    disks[device_name]['major_to_minor_no'] = dev_info['MAJ:MIN']
+                    disks[device_name]['fstype'] = dev_info['FSTYPE']
+                    disks[device_name]['mount_point'] = dev_info['MOUNTPOINT']
+                    disks[device_name]['label'] = dev_info['LABEL']
+                    disks[device_name]['fsuuid'] = dev_info['UUID']
+                    disks[device_name]['disk_type'] = dev_info['TYPE']
+                    disks[device_name]['read_ahead'] = dev_info['RA']
+                    if dev_info['RO'] == '0':
+                        disks[device_name]['read_only'] = False
+                    else:
+                        disks[device_name]['read_only'] = True
+                    if dev_info['RM'] == '0':
+                        disks[device_name]['removable_device'] = False
+                    else:
+                        disks[device_name]['removable_device'] = True
+                    disks[device_name]['size'] = dev_info['SIZE']
+                    disks[device_name]['state'] = dev_info['STATE']
+                    disks[device_name]['owner'] = dev_info['OWNER']
+                    disks[device_name]['group'] = dev_info['GROUP']
+                    disks[device_name]['mode'] = dev_info['MODE']
+                    disks[device_name]['alignment'] = dev_info['ALIGNMENT']
+                    disks[device_name]['min_io_size'] = dev_info['MIN-IO']
+                    disks[device_name]['optimal_io_size'] = dev_info['OPT-IO']
+                    disks[device_name]['phy_sector_size'] = dev_info['PHY-SEC']
+                    disks[device_name]['log_sector_size'] = dev_info['LOG-SEC']
+                    if disks[device_name]['disk_type'] == "disk":
+                        disks[device_name]['ssd'] = is_ssd(dev_info['ROTA'])
+                    else:
+                        disks[device_name]['ssd'] = False
+                    disks[device_name]['scheduler_name'] = dev_info['SCHED']
+                    disks[device_name]['req_queue_size'] = dev_info['RQ-SIZE']
+                    disks[device_name]['discard_align_offset'] = dev_info[
+                        'DISC-ALN']
+                    disks[device_name]['discard_granularity'] = dev_info[
+                        'DISC-GRAN']
+                    disks[device_name]['discard_max_bytes'] = dev_info[
+                        'DISC-MAX']
+                    disks[device_name]['discard_zeros_data'] = dev_info[
+                        'DISC-ZERO']
+                    if disks[device_name]['disk_type'] == 'part':
+                        disks[device_name]['used'] = True
+                        rv['disks'].append(disks[device_name])
+                        rv['used_disks_id'][device_name] = disks[device_name]['disk_id']
+                            
+                    if disks[device_name]['disk_type'] == "disk":
+                        all_parents.append(disks[device_name])
+                if dev_info['TYPE'] != 'disk':
+                    parent_ids.append(dev_info['PKNAME'])
+            for parent in all_parents:
+                if parent['device_name'] in parent_ids:
+                    parent['used'] = True
+                    rv['disks'].append(parent)
+                    rv['used_disks_id'][parent['device_name']] = parent['disk_id']
+                else:
+                    parent['used'] = False
+                    rv['disks'].append(parent)
+                    rv['free_disks_id'][parent['device_name']] = parent['disk_id']
         else:
             Event(
                 Message(
@@ -96,13 +112,11 @@ def get_node_disks():
 
 
 def get_all_disks():
-    disks = []
+    disks = {}
     # Block will give all disk and partitons and cdroms details
     cmd = cmd_utils.Command('hwinfo --block')
     out, err, rc = cmd.run()
     if not err:
-        all_disks = []
-        parents = []
         for blocks in out.split('\n\n'):
             devlist = {"disk_id": "",
                        "parent_id": "",
@@ -132,9 +146,6 @@ def get_all_disks():
                         line.split(':')[1].lstrip()
                 elif "Parent ID" in line:
                     devlist["parent_id"] = \
-                        line.split(':')[1].lstrip()
-                elif "Hardware Class" in line:
-                    devlist["disk_type"] = \
                         line.split(':')[1].lstrip()
                 elif "Model" in line:
                     devlist["model"] = \
@@ -195,16 +206,7 @@ def get_all_disks():
                 elif "Geometry (BIOS Legacy)" in line:
                     devlist["geo_bios_legacy"] = \
                         line.split(':')[1].lstrip()
-            if devlist["disk_type"] == "disk":
-                all_disks.append(devlist)
-            elif devlist["disk_type"] == "partition":
-                devlist["used"] = True
-                disks.append(devlist)
-                parents.append(devlist["parent_id"])
-        for disk in all_disks:
-            if not disk["disk_id"] in parents:
-                disk["used"] = False
-                disks.append(disk)
+            disks[devlist['device_name']] = devlist
     return disks, err
 
 
