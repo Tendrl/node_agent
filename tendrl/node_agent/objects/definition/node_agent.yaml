@@ -13,6 +13,25 @@ namespace.node_agent:
       uuid: 3f94a48a-05d7-408c-b400-e27827f4eacc
       type: Create
       version: 1
+    ExpandCluster:
+      tags:
+        - "provisioner/$TendrlContext.sds_name"
+      help: "Expands a cluster with mons/osds"
+      enabled: true
+      inputs:
+        mandatory:
+          - "Node[]"
+          - TendrlContext.integration_id
+          - TendrlContext.cluster_name
+          - TendrlContext.sds_name
+          - Cluster.public_network
+          - Cluster.cluster_network
+          - Cluster.node_identifier
+          - Cluster.node_configuration
+      run: tendrl.flows.ExpandCluster
+      type: Create
+      uuid: 2f94a48a-05d7-408c-b400-e27827f4edca
+      version: 1
   objects:
     GlobalNetwork:
       attrs:
