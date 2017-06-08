@@ -9,6 +9,7 @@ URL: https://github.com/Tendrl/node-agent
 
 BuildRequires: python-urllib3
 BuildRequires: python2-devel
+BuildRequires: python-setuptools
 BuildRequires: pytest
 BuildRequires: systemd
 BuildRequires: python-mock
