@@ -48,6 +48,12 @@ def sync():
                         tags.append(
                             "tendrl/integration/%s" %
                             NS.tendrl_context.integration_id)
+                if "provisioner/ceph" in service_tag:
+                    if NS.tendrl_context.integration_id:
+                        tags.append(
+                            "provisioner/%s" %
+                            NS.tendrl_context.integration_id
+                        )
 
                 if service_tag == "tendrl/server":
                     tags.append("tendrl/monitor")
