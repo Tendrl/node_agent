@@ -10,6 +10,8 @@ try:
     from python_gdeploy.actions import configure_gluster_firewall # noqa
     from python_gdeploy.actions import configure_gluster_service
     from python_gdeploy.actions import create_cluster
+    from python_gdeploy.actions import disable_gluster_service
+    from python_gdeploy.actions import disable_sds_service
     from python_gdeploy.actions import install_gluster
     from python_gdeploy.actions import remove_host
 except ImportError:
@@ -194,11 +196,11 @@ class GdeployPlugin(ProvisionerBasePlugin):
             return False
         return True
 
-    def shrink_gluster_cluster(self, host):
+    def shrink_gluster_cluster(self, hosts, force=False):
         self._reload_modules()
-        current_host = NS.node_context.fqdn
+        hostnames = [NS.node_context.fqdn] + hosts
         out, err, rc = remove_host.remove_host(
-            [current_host, host]
+            hostnames, force
         )
         if rc == 0:
             Event(
@@ -218,6 +220,68 @@ class GdeployPlugin(ProvisionerBasePlugin):
                     publisher=NS.publisher_id,
                     payload={
                         "message": "Error while shrinking gluster cluster"
+                        ". Details: %s" % str(out)
+                    },
+                    cluster_id=NS.tendrl_context.integration_id,
+                )
+            )
+            return False
+        return True
+
+    def stop_gluster_service(self, hosts):
+        self._reload_modules()
+        out, err, rc = disable_gluster_service.disable_gluster_service(
+            hosts
+        )
+        if rc == 0:
+            Event(
+                Message(
+                    priority="info",
+                    publisher=NS.publisher_id,
+                    payload={
+                        "message": "gluster service stopped successfully"
+                    },
+                    cluster_id=NS.tendrl_context.integration_id,
+                )
+            )
+        else:
+            Event(
+                Message(
+                    priority="debug",
+                    publisher=NS.publisher_id,
+                    payload={
+                        "message": "Error while stopping  gluster service"
+                        ". Details: %s" % str(out)
+                    },
+                    cluster_id=NS.tendrl_context.integration_id,
+                )
+            )
+            return False
+        return True
+
+    def stop_sds_service(self, hosts):
+        self._reload_modules()
+        out, err, rc = disable_sds_service.disable_sds_service(
+            hosts
+        )
+        if rc == 0:
+            Event(
+                Message(
+                    priority="info",
+                    publisher=NS.publisher_id,
+                    payload={
+                        "message": "sds service stopped successfully"
+                    },
+                    cluster_id=NS.tendrl_context.integration_id,
+                )
+            )
+        else:
+            Event(
+                Message(
+                    priority="debug",
+                    publisher=NS.publisher_id,
+                    payload={
+                        "message": "Error while stopping sds service"
                         ". Details: %s" % str(out)
                     },
                     cluster_id=NS.tendrl_context.integration_id,

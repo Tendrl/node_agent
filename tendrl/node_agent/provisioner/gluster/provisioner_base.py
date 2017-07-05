@@ -35,5 +35,13 @@ class ProvisionerBasePlugin(object):
         raise NotImplementedError()
 
     @abstractmethod
-    def shrink_gluster_cluster(self, hosts):
+    def shrink_gluster_cluster(self, hosts, force=False):
+        raise NotImplementedError()
+
+    @abstractmethod
+    def stop_gluster_service(self, hosts):
+        raise NotImplementedError()
+
+    @abstractmethod
+    def stop_sds_service(self, hosts):
         raise NotImplementedError()
