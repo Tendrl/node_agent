@@ -19,7 +19,7 @@ class StrictConfigParser(ConfigParser):
             # comment or blank line?
             if line.strip() == '' or line[0] in '#;':
                 continue
-            if line.split(None, 1)[0].lower() == 'rem' and line[0] in "rR":
+            if line.split(None, 1)[0] in ['rem', 'Rem', 'REM'] and line[0] in "rR":
                 # no leading whitespace
                 continue
             # continuation line?

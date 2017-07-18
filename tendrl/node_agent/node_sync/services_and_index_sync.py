@@ -63,7 +63,7 @@ def sync():
                          }
             )
         )
-        current_tags = list(NS.node_context.tags)
+        current_tags = NS.node_context.tags
         tags += current_tags
         NS.node_context.tags = list(set(tags))
         if NS.node_context.tags != current_tags:
