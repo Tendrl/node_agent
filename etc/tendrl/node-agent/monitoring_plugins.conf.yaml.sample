@@ -1,0 +1,13 @@
+plugins:
+  node:
+    - collectd
+    - cpu
+    - mount_point
+    - memory
+    - swap
+    - network
+    - latency
+    - disk
+    - dbpush
+  gluster:
+    - tendrl_glusterfs

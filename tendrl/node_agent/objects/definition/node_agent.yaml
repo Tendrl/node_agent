@@ -15,6 +15,25 @@ namespace.node_agent:
       uuid: 3f94a48a-05d7-408c-b400-e27827f4eacc
       type: Create
       version: 1
+    ConfigureCollectd:
+      atoms:
+        - tendrl.objects.Node.atoms.Cmd
+      help: "Execute given command on given node"
+      enabled: true
+      inputs:
+        mandatory:
+          - 'Node[]'
+          - Service.name
+          - graphite_host
+          - graphite_port
+      post_run:
+        - tendrl.objects.Service.atoms.CheckServiceStatus
+      pre_run:
+        - tendrl.objects.Node.atoms.CheckNodeUp
+      run: tendrl.node_agent.flows.ConfigureCollectd
+      type: Create
+      uuid: dc8fff3a-34d9-4786-9282-55eff6abb6c4
+      version: 1
   objects:
     GlobalNetwork:
       attrs:
