@@ -1,0 +1,12 @@
+<Plugin "python">
+    ModulePath "/usr/lib64/collectd/"
+
+    Import "tendrl_glusterfs_base"
+
+    <Module "tendrl_glusterfs_base">
+        integration_id "{{integration_id}}"
+        graphite_host "{{ graphite_host }}"
+        graphite_port {{ graphite_port }}
+        peer_name {{ hostname }}
+    </Module>
+</Plugin>
