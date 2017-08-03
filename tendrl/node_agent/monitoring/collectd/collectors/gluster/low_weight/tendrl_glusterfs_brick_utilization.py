@@ -215,6 +215,7 @@ class TendrlGlusterfsBrickUtilization(
                 for brick in sub_volume_bricks:
                     brick_path = brick['path']
                     brick_hostname = brick['hostname']
+                    utilization = None
                     try:
                         utilization = self.brick_utilization(
                             brick['path']
