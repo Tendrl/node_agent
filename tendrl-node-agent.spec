@@ -1,3 +1,11 @@
+%global selinuxtype targeted
+%global moduletype  services
+%global modulenames tendrl
+
+# todo relable should be enhanced later to specific things
+%global relabel_files() %{_sbindir}/restorecon -Rv /
+%global _format() export %1=""; for x in %{modulenames}; do %1+=%2; %1+=" "; done;
+
 Name: tendrl-node-agent
 Version: 1.5.1
 Release: 1%{?dist}
@@ -23,9 +31,21 @@ Requires: python-netifaces
 Requires: python-netaddr
 Requires: python-setuptools
 Requires: rsyslog
+Requires: %{name}-selinux
 
 %description
 Python module for Tendrl node bridge to manage storage node in the sds cluster
+
+%package selinux
+License: GPLv2
+Group: System Environment/Base
+Summary: SELinux Policies for Tendrl
+BuildArch: noarch
+Requires(post): selinux-policy-base, selinux-policy-targeted, policycoreutils, policycoreutils-python libselinux-utils
+BuildRequires: selinux-policy selinux-policy-devel
+
+%description selinux
+SELinux Policies for Tendrl
 
 %prep
 %setup
@@ -34,6 +54,7 @@ Python module for Tendrl node bridge to manage storage node in the sds cluster
 rm -rf %{name}.egg-info
 
 %build
+make bzip-selinux-policy
 %{__python} setup.py build
 
 # remove the sphinx-build leftovers
@@ -60,6 +81,20 @@ cp -a tendrl/node_agent/monitoring/collectd/templates/ceph/* $RPM_BUILD_ROOT%{_s
 cp -a tendrl/node_agent/monitoring/collectd/templates/gluster/* $RPM_BUILD_ROOT%{_sysconfdir}/collectd_template/
 cp -a tendrl/node_agent/monitoring/collectd/templates/node/* $RPM_BUILD_ROOT%{_sysconfdir}/collectd_template/
 
+# Install SELinux interfaces and policy modules
+install -d %{buildroot}%{_datadir}/selinux/packages
+
+install -m 0644 selinux/tendrl.pp.bz2 \
+	%{buildroot}%{_datadir}/selinux/packages
+
+%post selinux
+%_format MODULE %{_datadir}/selinux/packages/tendrl.pp.bz2
+%{_sbindir}/semodule -n -s %{selinuxtype} -i $MODULE
+if %{_sbindir}/selinuxenabled ; then
+    %{_sbindir}/load_policy
+    %relabel_files
+fi
+
 %post
 getent group tendrl >/dev/null || groupadd -r tendrl
 getent passwd tendrl-user >/dev/null || \
@@ -69,6 +104,15 @@ systemctl enable tendrl-node-agent
 
 %systemd_post tendrl-node-agent.service
 
+%postun selinux
+if [ $1 -eq 0 ]; then
+    %{_sbindir}/semodule -n -r %{modulenames} &> /dev/null || :
+    if %{_sbindir}/selinuxenabled ; then
+	%{_sbindir}/load_policy
+	%relabel_files
+    fi
+fi
+
 %preun
 %systemd_preun tendrl-node-agent.service
 
@@ -77,6 +121,10 @@ systemctl enable tendrl-node-agent
 
 %check
 py.test -v tendrl/node-agent/tests || :
+
+%files selinux
+%defattr(-,root,root,0755)
+%attr(0644,root,root) %{_datadir}/selinux/packages/tendrl.pp.bz2
 
 %files -f INSTALLED_FILES
 %dir %{_var}/log/tendrl/node-agent

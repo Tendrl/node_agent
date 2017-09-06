@@ -110,20 +110,4 @@ optional_policy(`
 	dbus_system_bus_client(tendrl_t)
 ')
 
-optional_policy(`
-	tendrl_stub_carbon()
-	tendrl_manage_conf(carbon_t)
-')
-
-optional_policy(`
-	tendrl_stub_httpd()
-	tendrl_read_conf(httpd_t)
-	corenet_tcp_bind_amanda_port(httpd_t)
-')
-
-optional_policy(`
-	tendrl_stub_lvm()
-	allow tendrl_t lvm_t:dbus send_msg;
-')
-
 files_list_var(tendrl_t)
