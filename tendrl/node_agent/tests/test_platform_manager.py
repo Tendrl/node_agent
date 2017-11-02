@@ -1,13 +1,25 @@
-from mock import MagicMock
+import __builtin__
+import maps
 import os
 import pytest
 import sys
+
+from mock import MagicMock
+
+sys.modules['tendrl.commons.message'] = MagicMock()
+sys.modules['tendrl.commons.event'] = MagicMock()
 from tendrl.node_agent.discovery.platform import manager
+del sys.modules['tendrl.commons.message']
+del sys.modules['tendrl.commons.event']
 
 
 class TestPlatformManager(object):
+
+    setattr(__builtin__, "NS", maps.NamedDict())
+    NS.publisher_id = "pytest"
+
     def test_platform_manager_error(self, monkeypatch):
-        def mock_listdir():
+        def mock_listdir(path):
             return ["pytest.py"]
         monkeypatch.setattr(os, "listdir", mock_listdir)
         with pytest.raises(ValueError):
