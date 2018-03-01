@@ -165,7 +165,17 @@ class NodeAgentSyncThread(sds_sync.StateSyncThread):
                         GlusterIntegrtaionsSyncThread()
                     NS.gluster_integrations_sync_thread.start()
                     NS.gluster_sds_sync_running = True
-
+            
+            # Check if anyone wants this agent should sync
+            # without any delay, hence the "continue"
+            try:
+                _sync_now = "/nodes/%s/_sync_now" % \
+                    NS.node_context.node_id
+                etcd_utils.read(_sync_now)
+                continue
+            except etcd.EtcdKeyNotFound:
+                pass
+                    
             time.sleep(_sleep)
         logger.log(
             "info",
