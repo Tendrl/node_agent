@@ -49,13 +49,13 @@ class DiscoverGlusterStorageSystem(DiscoverSDSPlugin):
         ret_val['peers'] = gfs_peers
 
         cmd = subprocess.Popen(
-            "gluster --version",
+            "rpm -qa | grep glusterfs-server",
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )
         out, err = cmd.communicate()
-        if err and 'command not found' in err:
+        if out in [None, ""] or err:
             logger.log(
                 "debug",
                 NS.publisher_id,
@@ -64,7 +64,16 @@ class DiscoverGlusterStorageSystem(DiscoverSDSPlugin):
             return ret_val
         lines = out.split('\n')
         if cluster_id:
-            ret_val['pkg_version'] = lines[0].split()[1]
-            ret_val['pkg_name'] = "gluster"
+            version_det = lines[0].split(
+                'glusterfs-server-'
+            )[-1]
+            ret_val['pkg_version'] = "%s.%s.%s" % (
+                version_det.split('.')[0],
+                version_det.split('.')[1],
+                version_det.split('.')[2]
+            )
+            ret_val['pkg_name'] = NS.compiled_definitions.get_parsed_defs()[
+                'namespace.tendrl'
+            ].get("sds_package_name")
 
         return ret_val
