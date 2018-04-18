@@ -59,7 +59,7 @@ class NodeAgentSyncThread(sds_sync.StateSyncThread):
             current_tags += ["tendrl/node_%s" % NS.node_context.node_id]
             NS.node_context.tags = list(set(current_tags))
             NS.node_context.status = "UP"
-            NS.node_context.save(ttl=_sync_ttl)
+            NS.node_context.save()
             NS.tendrl_context = NS.tendrl_context.load()
 
             sync_service_and_index_thread = threading.Thread(
@@ -129,7 +129,7 @@ class NodeAgentSyncThread(sds_sync.StateSyncThread):
                 NS.node_context.sync_status = "failed"
                 NS.node_context.last_sync = str(time_utils.now())
                 NS.node_context.status = "UP"
-                NS.node_context.save(ttl=_sync_ttl)
+                NS.node_context.save()
                 time.sleep(_sleep)
 
             sync_disks_thread = threading.Thread(target=disk_sync.sync)
@@ -146,7 +146,7 @@ class NodeAgentSyncThread(sds_sync.StateSyncThread):
             NS.node_context.sync_status = "done"
             NS.node_context.last_sync = str(time_utils.now())
             NS.node_context.status = "UP"
-            NS.node_context.save(ttl=_sync_ttl)
+            NS.node_context.save()
 
             if "tendrl/monitor" not in NS.node_context.tags:
                 sync_cluster_contexts_thread = threading.Thread(
