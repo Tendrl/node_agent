@@ -352,3 +352,22 @@ def find_brick_host(etcd_client, integration_id, brick_host):
             _msg = "Error finding fqdn/ip for brick %s" % brick_host
             collectd.warning(_msg)
             collectd.warning(traceback.format_exc())
+
+
+def find_node_managed(etcd_client, brick_host, integration_id):
+    if etcd_client:
+        try:
+            _key = "clusters/%s/nodes" % integration_id
+            all_nodes = etcd_client.read(_key)
+            for node_id in all_nodes.leaves:
+                key = "%s/NodeContext/data" % node_id.key
+                data = etcd_client.read(key).value
+                data = json.loads(data)
+                if brick_host == data.get("fqdn", ""):
+                    return data.get("is_managed", None)
+        except (urllib3.exceptions.TimeoutError, etcd.EtcdKeyNotFound):
+            _msg = "Error finding managed status for brick" \
+                   "node %s" % brick_host
+            collectd.warning(_msg)
+            collectd.warning(traceback.format_exc())
+    return None
