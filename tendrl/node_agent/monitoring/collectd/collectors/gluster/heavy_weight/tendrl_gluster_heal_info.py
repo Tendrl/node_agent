@@ -23,7 +23,12 @@ def _parse_heal_info_stats(tree, integration_id, etcd_client):
         brick_host = tendrl_glusterfs_utils.find_brick_host(
             etcd_client, integration_id, brick_host
         )
-
+        # if brick node is not managed then don't
+        # consider the brick
+        if tendrl_glusterfs_utils.find_node_managed(
+            etcd_client, brick_host, integration_id
+        ) != "yes":
+            continue
         try:
             no_of_entries = int(brick.find("numberOfEntries").text)
         except ValueError:

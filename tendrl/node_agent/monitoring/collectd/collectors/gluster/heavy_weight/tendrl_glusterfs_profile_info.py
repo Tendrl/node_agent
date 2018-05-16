@@ -275,6 +275,13 @@ class TendrlHealInfoAndProfileInfoPlugin(
             brick_host = tendrl_glusterfs_utils.find_brick_host(
                 self.etcd_client, self.CONFIG['integration_id'], brick_host
             )
+            # if brick node is not managed then don't
+            # consider the brick
+            if tendrl_glusterfs_utils.find_node_managed(
+                self.etcd_client, brick_host, self.CONFIG['integration_id']
+            ) != "yes":
+                continue
+
             t_name = "clusters.%s.volumes.%s.nodes.%s.bricks.%s.iops." \
                 "gauge-read"
             self.profile_info[
