@@ -41,8 +41,17 @@ def sync(sync_ttl=None):
                     tags.append("tendrl/monitor")
             s.save()
 
+        _cnc = None
+        _cnc_is_managed = False
+        if NS.tendrl.objects.ClusterNodeContext().exists():
+            _cnc = NS.tendrl.objects.ClusterNodeContext().load()
+            if _cnc.is_managed == "yes":
+                _cnc_is_managed = True
+        
+        _is_new_provisioner = False
+        
         if "tendrl/monitor" not in tags and \
-            NS.tendrl_context.integration_id:
+            NS.tendrl_context.integration_id and _cnc_is_managed:
             _cluster = NS.tendrl.objects.Cluster(
                 integration_id=NS.tendrl_context.integration_id
             ).load()
