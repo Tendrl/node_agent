@@ -50,27 +50,28 @@ def sync(sync_ttl=None):
 
         _is_new_provisioner = False
         if "tendrl/monitor" not in tags and \
-            NS.tendrl_context.integration_id and _cnc_is_managed:
+            NS.tendrl_context.integration_id:
             _cluster = NS.tendrl.objects.Cluster(
                 integration_id=NS.tendrl_context.integration_id
             ).load()
-            # Try to claim orphan "provisioner_%integration_id" tag
-            _tag = "provisioner/%s" % _cluster.integration_id
-            _is_new_provisioner = False
-            NS.node_context = NS.tendrl.objects.NodeContext().load()
-            if _tag not in NS.node_context.tags:
-                try:
-                    _index_key = "/indexes/tags/%s" % _tag
-                    _node_id = json.dumps([NS.node_context.node_id])
-                    etcd_utils.write(
-                        _index_key, _node_id,
-                        prevExist=False
-                    )
-                    etcd_utils.refresh(_index_key, sync_ttl + 50)
-                    tags.append(_tag)
-                    _is_new_provisioner = True
-                except etcd.EtcdAlreadyExist:
-                    pass
+            if _cnc_is_managed:
+                # Try to claim orphan "provisioner_%integration_id" tag
+                _tag = "provisioner/%s" % _cluster.integration_id
+                _is_new_provisioner = False
+                NS.node_context = NS.tendrl.objects.NodeContext().load()
+                if _tag not in NS.node_context.tags:
+                    try:
+                        _index_key = "/indexes/tags/%s" % _tag
+                        _node_id = json.dumps([NS.node_context.node_id])
+                        etcd_utils.write(
+                            _index_key, _node_id,
+                            prevExist=False
+                        )
+                        etcd_utils.refresh(_index_key, sync_ttl + 50)
+                        tags.append(_tag)
+                        _is_new_provisioner = True
+                    except etcd.EtcdAlreadyExist:
+                        pass
 
         # updating node context with latest tags
         logger.log(
