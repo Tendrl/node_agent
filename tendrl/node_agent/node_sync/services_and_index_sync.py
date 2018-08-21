@@ -61,7 +61,8 @@ def sync(sync_ttl=None):
                 if _cnc.is_managed == "yes":
                     _cnc_is_managed = True
             if _cluster.is_managed in [None, '', 'no']:
-                if _tag not in NS.node_context.tags:
+                if _tag not in NS.node_context.tags and \
+                        "gluster/server" in tags:
                     try:
                         _index_key = "/indexes/tags/%s" % _tag
                         _node_id = json.dumps([NS.node_context.node_id])
@@ -75,7 +76,8 @@ def sync(sync_ttl=None):
                     except etcd.EtcdAlreadyExist:
                         pass
             else:
-                if _tag not in NS.node_context.tags and _cnc_is_managed:
+                if _tag not in NS.node_context.tags and _cnc_is_managed and \
+                        "gluster/server" in tags:
                     try:
                         _index_key = "/indexes/tags/%s" % _tag
                         _node_id = json.dumps([NS.node_context.node_id])
