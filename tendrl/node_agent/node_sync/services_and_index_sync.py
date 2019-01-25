@@ -155,8 +155,28 @@ def sync(sync_ttl=None):
                         continue
                 if NS.node_context.node_id in _node_ids:
                     if sync_ttl and len(_node_ids) == 1:
-                        etcd_utils.refresh(index_key,
-                                           sync_ttl + 50)
+                        refresh_tag = True
+                        if "provisioner" in tag:
+                            _cluster = _cluster.load()
+                            if _cluster.is_managed == "yes":
+                                # Allow to claim provisioner tag only by a
+                                # node which have peer status is connected
+                                # in a managed cluster
+                                peers = NS.tendrl.objects.GlusterPeer(
+                                    node_id=NS.node_context.node_id
+                                ).load_all()
+                                for peer in peers:
+                                    if peer.hostname == 'localhost':
+                                        if peer.connected.lower() == \
+                                            'disconnected':
+                                                # don't allow to refresh
+                                                refresh_tag = False
+                                        break
+                        if refresh_tag:
+                            etcd_utils.refresh(
+                                index_key,
+                                sync_ttl + 50
+                            )
 
                     continue
                 else:
