@@ -35,9 +35,13 @@ class DiscoverGlusterStorageSystem(DiscoverSDSPlugin):
                 gfs_peer_data[peer[0]] = {"connected": peer[-1],
                                           "hostname": peer[-2]}
 
-        gfs_peers_uuid.sort()
-        return (hashlib.sha256("".join(gfs_peers_uuid)).hexdigest(),
-                gfs_peer_data)
+        # No need to display one node cluster
+        if len(gfs_peers_uuid) != 1:
+            gfs_peers_uuid.sort()
+            return (hashlib.sha256("".join(gfs_peers_uuid)).hexdigest(),
+                    gfs_peer_data)
+        else:
+            return "", {}
 
     def discover_storage_system(self):
         ret_val = {}
@@ -45,10 +49,12 @@ class DiscoverGlusterStorageSystem(DiscoverSDSPlugin):
         # get the gluster version details
         # form the temporary cluster_id
         cluster_id, gfs_peers = self._derive_cluster_id()
-        ret_val['detected_cluster_id'] = cluster_id
-        ret_val['detected_cluster_name'] = "gluster-%s" % cluster_id
-        ret_val['peers'] = gfs_peers
-
+        if cluster_id:
+            ret_val['detected_cluster_id'] = cluster_id
+            ret_val['detected_cluster_name'] = "gluster-%s" % cluster_id
+            ret_val['peers'] = gfs_peers
+        else:
+            return ret_val
         # Check if the file /usr/share/glusterfs/release exists.
         # if the file exists, read the version details from this
         if os.path.exists('/usr/share/glusterfs/release'):
