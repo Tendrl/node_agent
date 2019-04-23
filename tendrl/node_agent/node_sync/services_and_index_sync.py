@@ -60,7 +60,10 @@ def sync(sync_ttl=None):
                 ).load()
                 if _cnc.is_managed == "yes":
                     _cnc_is_managed = True
-            if _cluster.is_managed in [None, '', 'no']:
+            dc = NS.tendrl.objects.DetectedCluster().load()
+            dc_tag = "detected_cluster/%s" % dc.detected_cluster_id
+            if _cluster.is_managed in [None, '', 'no'] and \
+                    dc_tag in NS.node_context.tags:
                 if _tag not in NS.node_context.tags:
                     try:
                         _index_key = "/indexes/tags/%s" % _tag
@@ -74,7 +77,7 @@ def sync(sync_ttl=None):
                         _is_new_provisioner = True
                     except etcd.EtcdAlreadyExist:
                         pass
-            else:
+            elif dc_tag in NS.node_context.tags:
                 if _tag not in NS.node_context.tags and _cnc_is_managed:
                     try:
                         _index_key = "/indexes/tags/%s" % _tag
