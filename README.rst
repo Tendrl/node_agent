@@ -1,6 +1,10 @@
 .. vim: tw=79
 
 =================
+
+.. image:: https://api.codacy.com/project/badge/Grade/2638d6dd8e3148e6beb19175a084d28b
+   :alt: Codacy Badge
+   :target: https://app.codacy.com/app/GowthamShanmugam/node-agent?utm_source=github.com&utm_medium=referral&utm_content=Tendrl/node-agent&utm_campaign=Badge_Grade_Settings
 Tendrl Node Agent
 =================
 
