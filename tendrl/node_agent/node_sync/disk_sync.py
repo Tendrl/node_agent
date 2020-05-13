@@ -126,7 +126,7 @@ def get_disk_details():
     cmd = cmd_utils.Command('hwinfo --disk')
     out, err, rc = cmd.run()
     if not err:
-        out = out.encode('utf8')
+        out = unicode(out, errors="ignore").encode('utf8')
         for all_disks in out.split('\n\n'):
             devlist = {"disk_id": "",
                        "hardware_id": "",
@@ -272,7 +272,7 @@ def get_node_block_devices(disks_map):
     cmd = cmd_utils.Command(lsblk)
     out, err, rc = cmd.run()
     if not err:
-        out = out.encode('utf8')
+        out = unicode(out, errors="ignore").encode('utf8')
         devlist = map(
             lambda line: dict(zip(keys, line.split(' '))),
             out.splitlines())
@@ -371,7 +371,7 @@ def get_raw_reference():
         cmd = cmd_utils.Command("ls -l %s" % full_path)
         out, err, rc = cmd.run()
         if not err:
-            out = out.encode('utf8')
+            out = unicode(out, errors="ignore").encode('utf8')
             count = 0
             for line in out.split('\n'):
                 if count == 0:
